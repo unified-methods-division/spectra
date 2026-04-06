@@ -3,6 +3,8 @@ import tempfile
 
 from celery.result import AsyncResult
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from rest_framework import status, viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -14,13 +16,21 @@ from .tasks import parse_uploaded_feedback_file
 
 
 class SourceViewSet(viewsets.ModelViewSet):
-    queryset = Source.objects.all().order_by("-created_at")
     serializer_class = SourceSerializer
+
+    def get_queryset(self):
+        # TenantManager auto-filters by request.tenant via contextvar
+        return Source.objects.all().order_by("-created_at")
+
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.tenant)
 
 
 class FeedbackItemViewSet(viewsets.ModelViewSet):
-    queryset = FeedbackItem.objects.all().order_by("-received_at")
     serializer_class = FeedbackItemSerializer
+
+    def get_queryset(self):
+        return FeedbackItem.objects.all().order_by("-received_at")
 
 
 class UploadFeedbackFileView(APIView):
@@ -35,6 +45,7 @@ class UploadFeedbackFileView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # TenantManager scopes this lookup to request.tenant
         source = get_object_or_404(Source, id=source_id)
 
         extension = os.path.splitext(upload.name)[1].lower()
@@ -78,6 +89,47 @@ class UploadFeedbackFileView(APIView):
                 "message": "Upload accepted. Poll task status for progress.",
             },
             status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class WebhookFeedbackView(APIView):
+    """Receives a single feedback item via webhook POST."""
+
+    def post(self, request, source_id: str):
+        source = get_object_or_404(Source, id=source_id)
+
+        data = request.data
+        content = data.get("content") or data.get("text") or data.get("message")
+        if not content:
+            return Response(
+                {"detail": "content (or text/message) is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        received_at_raw = data.get("received_at") or data.get("timestamp")
+        received_at = None
+        if received_at_raw:
+            received_at = parse_datetime(str(received_at_raw))
+        if received_at is None:
+            received_at = timezone.now()
+
+        item = FeedbackItem.objects.create(
+            tenant=request.tenant,
+            source=source,
+            external_id=data.get("external_id") or data.get("id"),
+            content=content,
+            author=data.get("author") or data.get("user"),
+            metadata=data,
+            received_at=received_at,
+        )
+
+        return Response(
+            {
+                "id": str(item.id),
+                "source_id": str(source.id),
+                "status": "received",
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 

@@ -108,14 +108,18 @@ def parse_uploaded_feedback_file(
 
             if len(batch) >= batch_size:
                 with transaction.atomic():
-                    FeedbackItem.objects.bulk_create(batch, batch_size=batch_size)
-                created_count += len(batch)
+                    created = FeedbackItem.objects.bulk_create(
+                        batch, batch_size=batch_size, ignore_conflicts=True
+                    )
+                created_count += len(created)
                 batch.clear()
 
         if batch:
             with transaction.atomic():
-                FeedbackItem.objects.bulk_create(batch, batch_size=batch_size)
-            created_count += len(batch)
+                created = FeedbackItem.objects.bulk_create(
+                    batch, batch_size=batch_size, ignore_conflicts=True
+                )
+            created_count += len(created)
 
         source.last_synced_at = timezone.now()
         source.config = _next_config_state(

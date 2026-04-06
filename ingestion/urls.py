@@ -6,6 +6,7 @@ from .views import (
     IngestionTaskStatusView,
     SourceViewSet,
     UploadFeedbackFileView,
+    WebhookFeedbackView,
 )
 
 router = DefaultRouter()
@@ -22,6 +23,11 @@ urlpatterns = [
         "uploads/tasks/<str:task_id>/",
         IngestionTaskStatusView.as_view(),
         name="ingestion-task-status",
+    ),
+    path(
+        "sources/<uuid:source_id>/webhook/",
+        WebhookFeedbackView.as_view(),
+        name="webhook-feedback",
     ),
     path("", include(router.urls)),
 ]

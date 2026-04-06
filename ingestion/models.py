@@ -5,6 +5,8 @@ from django.db import models
 from django.db.models import Q
 from pgvector.django import IvfflatIndex, VectorField
 
+from core.managers import TenantManager
+
 
 class Source(models.Model):
     class SourceType(models.TextChoices):
@@ -20,6 +22,8 @@ class Source(models.Model):
     config = models.JSONField(null=True, blank=True)
     last_synced_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         db_table = "sources"
@@ -63,6 +67,8 @@ class FeedbackItem(models.Model):
     embedding = VectorField(dimensions=1536, null=True, blank=True)
     processed_at = models.DateTimeField(null=True, blank=True)
 
+    objects = TenantManager()
+
     class Meta:
         db_table = "feedback_items"
         indexes = [
@@ -74,6 +80,13 @@ class FeedbackItem(models.Model):
                 fields=["tenant"],
                 name="idx_feedback_unprocessed",
                 condition=Q(processed_at__isnull=True),
+            ),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "external_id"],
+                name="uq_feedback_source_extid",
+                condition=Q(external_id__isnull=False),
             ),
         ]
 
