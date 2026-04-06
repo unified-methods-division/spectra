@@ -13,7 +13,11 @@ router.register("sources", SourceViewSet, basename="sources")
 router.register("feedback-items", FeedbackItemViewSet, basename="feedback-items")
 
 urlpatterns = [
-    path("uploads/", UploadFeedbackFileView.as_view(), name="upload-feedback-file"),
+    path(
+        "sources/<uuid:source_id>/uploads/",
+        UploadFeedbackFileView.as_view(),
+        name="upload-feedback-file",
+    ),
     path(
         "uploads/tasks/<str:task_id>/",
         IngestionTaskStatusView.as_view(),

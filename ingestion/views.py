@@ -26,15 +26,8 @@ class FeedbackItemViewSet(viewsets.ModelViewSet):
 class UploadFeedbackFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
-    def post(self, request):
-        source_id = request.data.get("source_id")
+    def post(self, request, source_id: str):
         upload = request.FILES.get("file")
-
-        if not source_id:
-            return Response(
-                {"detail": "source_id is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         if upload is None:
             return Response(

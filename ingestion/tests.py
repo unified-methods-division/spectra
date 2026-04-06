@@ -37,8 +37,8 @@ class UploadIngestionTests(APITestCase):
         )
 
         response = self.client.post(
-            reverse("upload-feedback-file"),
-            {"source_id": str(self.source.id), "file": upload},
+            reverse("upload-feedback-file", args=[str(self.source.id)]),
+            {"file": upload},
             format="multipart",
         )
 
