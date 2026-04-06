@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from pgvector.django import IvfflatIndex, VectorField
@@ -74,13 +75,17 @@ class FeedbackItem(models.Model):
                 name="idx_feedback_unprocessed",
                 condition=Q(processed_at__isnull=True),
             ),
-            IvfflatIndex(
-                name="idx_feedback_embedding",
-                fields=["embedding"],
-                lists=100,
-                opclasses=["vector_cosine_ops"],
-            ),
         ]
+
+        if "sqlite" not in settings.DATABASES["default"]["ENGINE"]:
+            indexes.append(
+                IvfflatIndex(
+                    name="idx_feedback_embedding",
+                    fields=["embedding"],
+                    lists=100,
+                    opclasses=["vector_cosine_ops"],
+                )
+            )
 
 
 class RoutingConfig(models.Model):

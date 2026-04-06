@@ -1,9 +1,12 @@
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+RUNNING_TESTS = "test" in sys.argv
+USE_SQLITE_FOR_TESTS = os.environ.get("DJANGO_TEST_USE_SQLITE", "1") == "1"
 
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
@@ -59,7 +62,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL:
+if RUNNING_TESTS and USE_SQLITE_FOR_TESTS:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test.sqlite3",
+        }
+    }
+    MIGRATION_MODULES = {
+        "core": None,
+        "ingestion": None,
+        "analysis": None,
+        "themes": None,
+        "trends": None,
+    }
+elif DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
