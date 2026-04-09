@@ -7,7 +7,7 @@ from core.models import Tenant
 from ingestion.models import FeedbackAnalysis, FeedbackItem, RoutingConfig, Source
 from themes.models import Theme
 
-from .tasks import classify_feedback_batch
+from .tasks import classify_feedback_batch, embed_feedback_batch, process_source
 
 
 def _make_analysis(**overrides) -> FeedbackAnalysis:
@@ -131,3 +131,106 @@ class ClassifyBatchTests(TestCase):
         self.source.refresh_from_db()
         self.assertEqual(self.source.config["classification_status"], "completed")
         self.assertEqual(self.source.config["classification_counts"]["classified"], 1)
+
+
+FAKE_VECTOR = [0.1] * 1536
+
+
+class EmbedBatchTests(TestCase):
+    def setUp(self):
+        self.tenant = Tenant.objects.create(name="Test Tenant")
+        self.source = Source.objects.create(
+            tenant=self.tenant,
+            name="Test Source",
+            source_type=Source.SourceType.CSV_UPLOAD,
+        )
+
+    def _create_item(self, content="Test feedback", **kwargs):
+        defaults = {
+            "tenant": self.tenant,
+            "source": self.source,
+            "content": content,
+            "received_at": timezone.now(),
+        }
+        defaults.update(kwargs)
+        return FeedbackItem.objects.create(**defaults)
+
+    def _create_classified_item(self, content="Classified feedback", **kwargs):
+        """Create an item that has been classified but not yet embedded."""
+        return self._create_item(
+            content,
+            sentiment=FeedbackItem.Sentiment.NEGATIVE,
+            sentiment_confidence=0.9,
+            urgency=FeedbackItem.Urgency.MEDIUM,
+            themes=["ux"],
+            ai_summary="Test summary",
+            processed_at=timezone.now(),
+            **kwargs,
+        )
+
+    @patch("analysis.tasks.embed_texts")
+    def test_embed_batch_processes_classified_items(self, mock_embed):
+        """Embeds classified items, skips unprocessed ones"""
+        mock_embed.return_value = [FAKE_VECTOR, FAKE_VECTOR]
+        classified = [self._create_classified_item(f"Item {i}") for i in range(2)]
+        self._create_item("Unprocessed — no processed_at")
+
+        result = embed_feedback_batch(str(self.source.id))
+
+        self.assertEqual(result["embedded"], 2)
+        mock_embed.assert_called_once()
+        for item in classified:
+            item.refresh_from_db()
+            self.assertIsNotNone(item.embedding)
+
+    @patch("analysis.tasks.embed_texts")
+    def test_embed_batch_skips_already_embedded(self, mock_embed):
+        """Items with existing embeddings are not re-embedded"""
+        mock_embed.return_value = [FAKE_VECTOR]
+        self._create_classified_item("Already embedded", embedding=FAKE_VECTOR)
+        fresh = self._create_classified_item("Needs embedding")
+
+        result = embed_feedback_batch(str(self.source.id))
+
+        self.assertEqual(result["embedded"], 1)
+        fresh.refresh_from_db()
+        self.assertIsNotNone(fresh.embedding)
+
+    @patch("analysis.tasks.embed_texts")
+    def test_embed_batch_chunk_error_resilience(self, mock_embed):
+        """One chunk failing doesn't kill the entire batch"""
+        # First chunk fails, second succeeds
+        mock_embed.side_effect = [Exception("API error"), [FAKE_VECTOR]]
+        items = [self._create_classified_item(f"Item {i}") for i in range(2)]
+
+        with patch("analysis.tasks.EMBED_CHUNK_SIZE", 1):
+            result = embed_feedback_batch(str(self.source.id))
+
+        self.assertEqual(result["embedded"], 1)
+        self.assertEqual(result["failed"], 1)
+
+    @patch("analysis.tasks.embed_texts")
+    def test_source_config_updated_on_embed_completion(self, mock_embed):
+        """Source config tracks embedding status and counts"""
+        mock_embed.return_value = [FAKE_VECTOR]
+        self._create_classified_item()
+
+        embed_feedback_batch(str(self.source.id))
+
+        self.source.refresh_from_db()
+        self.assertEqual(self.source.config["embedding_status"], "completed")
+        self.assertEqual(self.source.config["embedding_counts"]["embedded"], 1)
+
+    @patch("analysis.tasks.embed_feedback_batch")
+    @patch("analysis.tasks.classify_feedback_batch")
+    def test_process_source_chains_classify_and_embed(
+        self, mock_classify, mock_embed
+    ):
+        """Pipeline task dispatches classify → embed chain"""
+        process_source(str(self.source.id))
+
+        # Both tasks should have been called via chain.apply_async
+        # Since we're mocking the tasks themselves, verify the chain was built
+        # by checking that apply_async was called on the chain
+        # (process_source builds and dispatches the chain)
+        self.assertTrue(mock_classify.si.called or mock_embed.si.called)

@@ -9,15 +9,11 @@ wheels/
 # Virtual environments
 .venv
 
-# AI Learning Artifacts
-colearn/
-
 # Environment variables
 .env
 .env.*
 !.env.example
 
-# Editor/tool state
-.cursor/
-.claude/
-memory/
+# Node
+node_modules/
+.next/

@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from celery import shared_task
+from celery import chain, shared_task
 from django.db import transaction
 from django.utils import timezone
 
@@ -9,6 +9,7 @@ from ingestion.models import FeedbackItem, RoutingConfig, Source
 from themes.models import Theme
 
 from .classifier import classify_item
+from .embedder import embed_texts
 
 logger = logging.getLogger(__name__)
 
@@ -152,3 +153,95 @@ def classify_feedback_batch(
         )
         source.save(update_fields=["config"])
         raise
+
+
+EMBED_CHUNK_SIZE = 100
+
+
+@shared_task(bind=True, name="analysis.embed_feedback_batch")
+def embed_feedback_batch(
+    self, source_id: str, batch_size: int = 500
+) -> dict[str, Any]:
+    source = Source.objects.select_related("tenant").get(id=source_id)
+    source.config = _next_config_state(
+        source.config,
+        embedding_status="processing",
+        embedding_task_id=self.request.id,
+        embedding_started_at=timezone.now().isoformat(),
+        embedding_error=None,
+    )
+    source.save(update_fields=["config"])
+
+    # Only embed classified items that don't have embeddings yet
+    items = list(
+        FeedbackItem.objects.filter(
+            source_id=source_id,
+            processed_at__isnull=False,
+            embedding__isnull=True,
+        )[:batch_size]
+    )
+
+    embedded_count = 0
+    failed_count = 0
+
+    # Process in chunks — one API call per chunk (API-level batching)
+    for i in range(0, len(items), EMBED_CHUNK_SIZE):
+        chunk = items[i : i + EMBED_CHUNK_SIZE]
+        try:
+            vectors = embed_texts([item.content for item in chunk])
+            for item, vector in zip(chunk, vectors):
+                item.embedding = vector
+            embedded_count += len(chunk)
+        except Exception:
+            logger.exception(
+                "Embedding failed for chunk %d-%d of source %s",
+                i,
+                i + len(chunk),
+                source_id,
+            )
+            failed_count += len(chunk)
+
+    try:
+        with transaction.atomic():
+            # Only update items that got embeddings
+            items_with_embeddings = [item for item in items if item.embedding]
+            if items_with_embeddings:
+                FeedbackItem.objects.bulk_update(
+                    items_with_embeddings, fields=["embedding"]
+                )
+
+        source.config = _next_config_state(
+            source.config,
+            embedding_status="completed",
+            embedding_finished_at=timezone.now().isoformat(),
+            embedding_counts={
+                "embedded": embedded_count,
+                "failed": failed_count,
+            },
+        )
+        source.save(update_fields=["config"])
+
+        return {
+            "source_id": source_id,
+            "embedded": embedded_count,
+            "failed": failed_count,
+        }
+    except Exception as exc:
+        source.config = _next_config_state(
+            source.config,
+            embedding_status="failed",
+            embedding_finished_at=timezone.now().isoformat(),
+            embedding_error=str(exc),
+        )
+        source.save(update_fields=["config"])
+        raise
+
+
+@shared_task(name="analysis.process_source")
+def process_source(source_id: str) -> None:
+    """Full pipeline: classify → embed.  Dispatches as a Celery chain."""
+    pipeline = chain(
+        classify_feedback_batch.si(source_id),
+        embed_feedback_batch.si(source_id),
+    )
+    pipeline.apply_async()
