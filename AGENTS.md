@@ -11,6 +11,14 @@
 - Apply your own standards to your own output: if you dock the student for something, don't do it in your tightened/ideal version. The student catches inconsistency immediately.
 - When grading hypothetical scenarios (e.g., "explain to a client"), don't dock for referencing future product surfaces — that's natural in a pitch context.
 
+## Runtime Requirements
+
+- Redis required for Celery (uploads, classification, embedding). Without it, file uploads 500.
+- Backend `.env` must have `DATABASE_URL` — settings.py loads it via `python-dotenv`. Without it, Django falls back to local Postgres creds and fails.
+- Frontend `.env.local` must have `VITE_TENANT_ID` — the API client sends it as `X-Tenant-ID` header. Must be a valid UUID of an existing tenant.
+- Session auth: user must log in at `/admin/` to get a session cookie before the frontend can POST (CSRF + auth).
+- Vite proxy handles `/api` → `localhost:8000` in dev, so frontend and backend don't need CORS negotiation locally.
+
 ## Learned Workspace Facts
 
 - In `/colearn/milestone-*.md`, new build notes should follow the existing pattern by appending beneath the original section content.
