@@ -3,8 +3,10 @@ import sys
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 RUNNING_TESTS = "test" in sys.argv
 USE_SQLITE_FOR_TESTS = os.environ.get("DJANGO_TEST_USE_SQLITE", "1") == "1"
 
