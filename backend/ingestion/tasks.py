@@ -130,6 +130,12 @@ def parse_uploaded_feedback_file(
         )
         source.save(update_fields=["last_synced_at", "config"])
 
+        # Kick off classification → embedding pipeline
+        if created_count > 0:
+            from analysis.tasks import process_source
+
+            process_source.delay(source_id)
+
         return {
             "source_id": source_id,
             "file_format": file_format,
