@@ -17,3 +17,9 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "redis>=7.4.0",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.10",
+    "vulture>=2.16",
+]

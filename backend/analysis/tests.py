@@ -201,7 +201,7 @@ class EmbedBatchTests(TestCase):
         """One chunk failing doesn't kill the entire batch"""
         # First chunk fails, second succeeds
         mock_embed.side_effect = [Exception("API error"), [FAKE_VECTOR]]
-        items = [self._create_classified_item(f"Item {i}") for i in range(2)]
+        [self._create_classified_item(f"Item {i}") for i in range(2)]
 
         with patch("analysis.tasks.EMBED_CHUNK_SIZE", 1):
             result = embed_feedback_batch(str(self.source.id))
