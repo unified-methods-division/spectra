@@ -28,7 +28,7 @@ export function ExplorerPage() {
             alt=""
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/20 to-background" />
+          <div className="absolute inset-0 bg-linear-to-b from-background/60 via-background/20 to-background" />
         </div>
       </div>
 
@@ -36,7 +36,7 @@ export function ExplorerPage() {
       <div className="relative -mt-24 mx-auto max-w-3xl px-10">
         {/* Heading */}
         <div className="mb-8">
-          <span className="text-[10px] font-medium tracking-[0.2em] text-foreground/80 uppercase">
+          <span className="text-xs font-medium tracking-[0.2em] text-foreground/80 uppercase">
             Feedback Explorer
           </span>
           <h1 className="text-3xl font-normal tracking-tight text-foreground">
@@ -59,7 +59,7 @@ export function ExplorerPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.15 }}
-            className="mt-8 mb-2 text-[11px] font-medium tracking-[0.15em] text-muted-foreground/50 uppercase"
+            className="mt-8 mb-2 text-xs font-medium tracking-[0.15em] text-muted-foreground/50 uppercase"
           >
             {data.count.toLocaleString()} result{data.count !== 1 ? "s" : ""}
           </motion.p>
@@ -138,7 +138,7 @@ export function ExplorerPage() {
             >
               Previous
             </Button>
-            <span className="text-[11px] text-muted-foreground tabular-nums font-mono">
+            <span className="text-xs text-muted-foreground tabular-nums font-mono">
               {currentPage} / {totalPages}
             </span>
             <Button

@@ -98,7 +98,7 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
           value={searchValue}
           onChange={handleSearchChange}
           placeholder="What are they saying about..."
-          className="pl-9 h-10 text-[15px]"
+          className="pl-9 h-10 text-base"
         />
       </div>
 
@@ -216,7 +216,7 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.1 }}
                 onClick={() => clearFilter(f.key)}
-                className="inline-flex items-center gap-1 rounded-md bg-foreground/8 px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-foreground/12 hover:text-foreground cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-md bg-foreground/8 px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-foreground/12 hover:text-foreground cursor-pointer"
               >
                 {f.label}
                 <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3" />

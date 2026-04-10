@@ -9,11 +9,11 @@ type FeedbackRowProps = {
   onClick: () => void
 }
 
-const SENTIMENT_STYLES: Record<string, { text: string; dot: string }> = {
-  positive: { text: "text-success", dot: "bg-success" },
-  negative: { text: "text-destructive", dot: "bg-destructive" },
-  neutral: { text: "text-muted-foreground", dot: "bg-muted-foreground" },
-  mixed: { text: "text-warning", dot: "bg-warning" },
+const SENTIMENT_STYLES: Record<string, { text: string; bg: string }> = {
+  positive: { text: "text-success", bg: "bg-success/10" },
+  negative: { text: "text-destructive", bg: "bg-destructive/10" },
+  neutral: { text: "text-muted-foreground", bg: "bg-muted" },
+  mixed: { text: "text-warning", bg: "bg-warning/10" },
 }
 
 export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowProps) {
@@ -45,20 +45,17 @@ export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowPro
       />
 
       {/* Content — the user's voice, dominant element */}
-      <p className="text-[16px] leading-[1.6] text-foreground line-clamp-3">
+      <p className="text-base leading-[1.6] text-foreground line-clamp-3">
         {item.content}
       </p>
 
       {/* Metadata row */}
-      <div className="mt-2.5 flex items-center gap-2 text-[11px] tracking-wide">
+      <div className="mt-2.5 flex items-center gap-2 text-xs tracking-wide">
         {/* Sentiment: dot + label */}
         {sentiment && (
           <>
-            <span className="inline-flex items-center gap-1.5">
-              <span className={cn("size-1.5 rounded-full", sentiment.dot)} />
-              <span className={cn("font-medium", sentiment.text)}>
-                {item.sentiment}
-              </span>
+            <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", sentiment.text, sentiment.bg)}>
+              {item.sentiment}
             </span>
             <span className="text-muted-foreground/40" aria-hidden>&middot;</span>
           </>
@@ -71,13 +68,13 @@ export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowPro
               {item.themes.slice(0, 3).map((theme) => (
                 <span
                   key={theme}
-                  className="bg-foreground/8 px-1.5 py-px rounded text-[10px] font-mono text-muted-foreground"
+                  className="bg-foreground/8 px-1.5 py-px rounded text-xs font-mono text-muted-foreground"
                 >
                   {theme}
                 </span>
               ))}
               {item.themes.length > 3 && (
-                <span className="text-[10px] text-muted-foreground/50">
+                <span className="text-xs text-muted-foreground/50">
                   +{item.themes.length - 3}
                 </span>
               )}

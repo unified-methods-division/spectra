@@ -26,18 +26,18 @@ const URGENCY_OPTIONS: { value: Urgency; label: string; className?: string }[] =
   { value: "critical", label: "Critical", className: "text-destructive" },
 ]
 
-const SENTIMENT_STYLES: Record<string, string> = {
-  positive: "text-success",
-  negative: "text-destructive",
-  neutral: "text-muted-foreground",
-  mixed: "text-warning",
+const SENTIMENT_STYLES: Record<string, { text: string; bg: string }> = {
+  positive: { text: "text-success", bg: "bg-success/10" },
+  negative: { text: "text-destructive", bg: "bg-destructive/10" },
+  neutral: { text: "text-muted-foreground", bg: "bg-muted" },
+  mixed: { text: "text-warning", bg: "bg-warning/10" },
 }
 
 const URGENCY_STYLES: Record<string, string> = {
-  low: "text-muted-foreground",
-  medium: "text-foreground",
-  high: "text-warning",
-  critical: "text-destructive",
+  low: "text-muted-foreground bg-muted",
+  medium: "text-foreground bg-foreground/8",
+  high: "text-warning bg-warning/10",
+  critical: "text-destructive bg-destructive/10",
 }
 
 function confidenceLabel(confidence: number): { text: string; className: string } {
@@ -166,8 +166,8 @@ function CorrectableField({
             ) : (
               <HugeiconsIcon
                 icon={PencilEdit01Icon}
-                strokeWidth={1.5}
-                className="size-3 text-muted-foreground/60 group-hover/field:text-muted-foreground transition-colors"
+                strokeWidth={2}
+                className="size-4 text-muted-foreground hover:text-foreground transition-colors"
               />
             )}
           </motion.div>
@@ -209,7 +209,7 @@ function CorrectableThemes({
 
   return (
     <div className="group/field flex items-start justify-between py-3">
-      <span className="text-[13px] text-muted-foreground pt-1">
+      <span className="text-xs text-muted-foreground pt-1">
         Themes
       </span>
       <div className="flex flex-wrap gap-1 justify-end items-center max-w-[65%]">
@@ -217,7 +217,7 @@ function CorrectableThemes({
           <span
             key={theme}
             className={cn(
-              "inline-flex items-center gap-1 bg-foreground/8 px-1.5 py-0.5 rounded text-[11px] font-mono text-muted-foreground",
+              "inline-flex items-center gap-1 bg-foreground/8 px-1.5 py-0.5 rounded text-xs font-mono text-muted-foreground",
               removing === theme && "opacity-50",
             )}
           >
@@ -248,14 +248,14 @@ function CorrectableThemes({
           onClick={() => setEditing(!editing)}
           className={cn(
             "transition-colors cursor-pointer",
-            editing ? "text-muted-foreground/60" : "text-muted-foreground/20 group-hover/field:text-muted-foreground/60",
+            editing ? "text-muted-foreground" : "text-muted-foreground hover:text-foreground",
           )}
           aria-label="Edit themes"
         >
           <HugeiconsIcon
             icon={editing ? Cancel01Icon : PencilEdit01Icon}
-            strokeWidth={1.5}
-            className="size-3"
+            strokeWidth={2}
+            className="size-4"
           />
         </button>
       </div>
@@ -317,13 +317,13 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
           </p>
 
           {/* User's voice — the centerpiece */}
-          <blockquote className="text-[16px] leading-[1.7] text-foreground mb-10 border-l-2 border-primary/30 pl-4">
+          <blockquote className="text-base leading-[1.7] text-foreground mb-10 border-l-2 border-primary/30 pl-4">
             {item.content}
           </blockquote>
 
           {/* AI Analysis */}
           <section className="mb-10">
-            <h3 className="text-[14px] font-medium text-foreground mb-4">
+            <h3 className="text-sm font-medium text-foreground mb-4">
               AI Analysis
             </h3>
 
@@ -340,7 +340,7 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Sentiment</span>
                   {conf && (
-                    <span className="text-[13px] font-mono text-muted-foreground tabular-nums">
+                    <span className="text-xs font-mono text-muted-foreground tabular-nums">
                       {Math.round(item.sentiment_confidence! * 100)}%
                     </span>
                   )}
@@ -349,7 +349,9 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
                   currentValue={item.sentiment}
                   displayValue={item.sentiment ?? "Unclassified"}
                   displayClassName={
-                    item.sentiment ? SENTIMENT_STYLES[item.sentiment] : "text-muted-foreground/50"
+                    item.sentiment
+                      ? cn("rounded-full px-2 py-0.5", SENTIMENT_STYLES[item.sentiment].text, SENTIMENT_STYLES[item.sentiment].bg)
+                      : "text-muted-foreground/50"
                   }
                   options={SENTIMENT_OPTIONS}
                   fieldName="sentiment"
@@ -366,7 +368,9 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
                   currentValue={item.urgency}
                   displayValue={item.urgency ?? "Unclassified"}
                   displayClassName={
-                    item.urgency ? URGENCY_STYLES[item.urgency] : "text-muted-foreground/50"
+                    item.urgency
+                      ? cn("rounded-full px-2 py-0.5", URGENCY_STYLES[item.urgency])
+                      : "text-muted-foreground/50"
                   }
                   options={URGENCY_OPTIONS}
                   fieldName="urgency"

@@ -22,7 +22,7 @@ export function SourcesPage() {
             alt=""
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
+          <div className="absolute inset-0 bg-linear-to-b from-background/20 via-transparent to-background" />
         </div>
       </div>
 
