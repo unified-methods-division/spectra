@@ -97,7 +97,7 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
         <Input
           value={searchValue}
           onChange={handleSearchChange}
-          placeholder="What are users saying about..."
+          placeholder="What are they saying about..."
           className="pl-9 h-10 text-[15px]"
         />
       </div>
