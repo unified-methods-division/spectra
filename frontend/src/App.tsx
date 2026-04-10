@@ -8,7 +8,7 @@ const navItems = [
   { label: "Themes", href: "/themes" },
 ]
 
-export function App() {
+function App() {
   const location = useLocation()
 
   return (
