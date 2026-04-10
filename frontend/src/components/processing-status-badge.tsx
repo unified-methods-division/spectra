@@ -1,20 +1,56 @@
+import { AnimatePresence, motion } from "motion/react"
 import { useProcessingStatus } from "@/hooks/use-sources"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import { cn, sourceTypeCopy } from "@/lib/utils"
 import type { Source } from "@/types/api"
 
 type StatusKey = "no_data" | "ingesting" | "ingested" | "processing" | "completed" | "failed"
 
 const STATUS_CONFIG: Record<
   StatusKey,
-  { label: string; variant: "secondary" | "outline" | "default" | "destructive"; pulse: boolean }
+  { label: string; dot: string; glow: string; text: string; alive: boolean }
 > = {
-  no_data: { label: "Awaiting upload", variant: "secondary", pulse: false },
-  ingesting: { label: "Importing...", variant: "outline", pulse: true },
-  ingested: { label: "Ready to analyze", variant: "outline", pulse: false },
-  processing: { label: "Analyzing...", variant: "outline", pulse: true },
-  completed: { label: "Done", variant: "default", pulse: false },
-  failed: { label: "Error", variant: "destructive", pulse: false },
+  no_data: {
+    label: "",
+    dot: "bg-muted-foreground/30",
+    glow: "",
+    text: "text-muted-foreground/60",
+    alive: false,
+  },
+  ingesting: {
+    label: "Importing",
+    dot: "bg-info",
+    glow: "text-info animate-[glow-pulse_2s_ease-in-out_infinite]",
+    text: "text-info",
+    alive: true,
+  },
+  ingested: {
+    label: "Imported",
+    dot: "bg-success",
+    glow: "text-success shadow-[0_0_4px_1px_currentColor]",
+    text: "text-success",
+    alive: false,
+  },
+  processing: {
+    label: "Analyzing",
+    dot: "bg-info",
+    glow: "text-info animate-[glow-pulse_2s_ease-in-out_infinite]",
+    text: "text-info",
+    alive: true,
+  },
+  completed: {
+    label: "Done",
+    dot: "bg-success",
+    glow: "text-success shadow-[0_0_4px_1px_currentColor]",
+    text: "text-success",
+    alive: false,
+  },
+  failed: {
+    label: "Error",
+    dot: "bg-destructive",
+    glow: "text-destructive shadow-[0_0_4px_1px_currentColor]",
+    text: "text-destructive",
+    alive: false,
+  },
 }
 
 function deriveStatus(source: Source, analysisStatus?: string | null): StatusKey {
@@ -33,26 +69,45 @@ function deriveStatus(source: Source, analysisStatus?: string | null): StatusKey
   return "no_data"
 }
 
+
 export function ProcessingStatusBadge({ source }: { source: Source }) {
   const { data, isLoading } = useProcessingStatus(source.id)
 
-  if (isLoading) {
-    return (
-      <Badge variant="secondary" className="animate-pulse">
-        ...
-      </Badge>
-    )
-  }
-
-  const status = deriveStatus(source, data?.overall_status)
-  const config = STATUS_CONFIG[status]
+  const status = isLoading ? null : deriveStatus(source, data?.overall_status)
+  const config = status ? STATUS_CONFIG[status] : null
 
   return (
-    <Badge
-      variant={config.variant}
-      className={cn(config.pulse && "animate-pulse")}
-    >
-      {config.label}
-    </Badge>
+    <AnimatePresence mode="wait">
+      {!config ? (
+        <motion.span
+          key="loading"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground"
+        >
+          <span className="size-1.5 rounded-full bg-muted-foreground/20" />
+        </motion.span>
+      ) : (
+        <motion.span
+          key={status}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className={cn("flex items-center gap-2 text-xs", config.text)}
+        >
+          <span
+            className={cn(
+              "size-1.5 shrink-0 rounded-full",
+              config.dot,
+              config.glow,
+            )}
+          />
+          {config.label || sourceTypeCopy(source.source_type).emptyStatus}
+        </motion.span>
+      )}
+    </AnimatePresence>
   )
 }

@@ -5,32 +5,57 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" })
-
-const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
-  ["day", 86_400_000],
-  ["hour", 3_600_000],
-  ["minute", 60_000],
-  ["second", 1_000],
+const SHORT_UNITS: [string, number][] = [
+  ["d", 86_400_000],
+  ["h", 3_600_000],
+  ["m", 60_000],
 ]
 
 export function formatRelativeTime(dateString: string): string {
-  const diff = new Date(dateString).getTime() - Date.now()
-  for (const [unit, ms] of UNITS) {
-    if (Math.abs(diff) >= ms || unit === "second") {
-      return rtf.format(Math.round(diff / ms), unit)
+  const elapsed = Date.now() - new Date(dateString).getTime()
+  for (const [label, ms] of SHORT_UNITS) {
+    if (elapsed >= ms) {
+      return `${Math.floor(elapsed / ms)}${label} ago`
     }
   }
   return "just now"
 }
 
-const SOURCE_TYPE_LABELS: Record<string, string> = {
-  csv_upload: "CSV Upload",
-  webhook: "Webhook",
-  rss_pull: "RSS Pull",
-  api_pull: "API Pull",
+type SourceTypeCopy = {
+  label: string
+  emptyStatus: string
+  emptyTimestamp: string
 }
 
-export function sourceTypeLabel(type: string): string {
-  return SOURCE_TYPE_LABELS[type] ?? type
+const SOURCE_TYPE_COPY: Record<string, SourceTypeCopy> = {
+  csv_upload: {
+    label: "CSV Upload",
+    emptyStatus: "Awaiting upload",
+    emptyTimestamp: "No file uploaded",
+  },
+  webhook: {
+    label: "Webhook",
+    emptyStatus: "Awaiting events",
+    emptyTimestamp: "No events received",
+  },
+  rss_pull: {
+    label: "RSS Pull",
+    emptyStatus: "Awaiting sync",
+    emptyTimestamp: "No feeds pulled",
+  },
+  api_pull: {
+    label: "API Pull",
+    emptyStatus: "Awaiting connection",
+    emptyTimestamp: "Not connected",
+  },
+}
+
+const FALLBACK_COPY: SourceTypeCopy = {
+  label: "Unknown",
+  emptyStatus: "No data",
+  emptyTimestamp: "No data yet",
+}
+
+export function sourceTypeCopy(type: string): SourceTypeCopy {
+  return SOURCE_TYPE_COPY[type] ?? FALLBACK_COPY
 }
