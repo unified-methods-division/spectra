@@ -3,7 +3,7 @@ import { cn, formatRelativeTime } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Cancel01Icon, PencilEdit01Icon, Tick02Icon, SparklesIcon } from "@hugeicons/core-free-icons"
+import { Cancel01Icon, PencilEdit01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
 import { useSubmitCorrection } from "@/hooks/use-explorer"
 import type { FeedbackItem, Sentiment, Urgency } from "@/types/api"
 
@@ -19,11 +19,11 @@ const SENTIMENT_OPTIONS: { value: Sentiment; label: string; className: string }[
   { value: "mixed", label: "Mixed", className: "text-warning" },
 ]
 
-const URGENCY_OPTIONS: { value: Urgency; label: string }[] = [
+const URGENCY_OPTIONS: { value: Urgency; label: string; className?: string }[] = [
   { value: "low", label: "Low" },
   { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "critical", label: "Critical" },
+  { value: "high", label: "High", className: "text-warning" },
+  { value: "critical", label: "Critical", className: "text-destructive" },
 ]
 
 const SENTIMENT_STYLES: Record<string, string> = {
@@ -38,6 +38,12 @@ const URGENCY_STYLES: Record<string, string> = {
   medium: "text-foreground",
   high: "text-warning",
   critical: "text-destructive",
+}
+
+function confidenceLabel(confidence: number): { text: string; className: string } {
+  if (confidence >= 0.9) return { text: "High", className: "text-success" }
+  if (confidence >= 0.7) return { text: "Medium", className: "text-warning" }
+  return { text: "Low", className: "text-destructive" }
 }
 
 /* ─── Toast ─── */
@@ -63,7 +69,6 @@ function CorrectionToast({ visible }: { visible: boolean }) {
 /* ─── Inline correction fields ─── */
 
 function CorrectableField({
-  label,
   currentValue,
   displayValue,
   displayClassName,
@@ -72,7 +77,6 @@ function CorrectableField({
   itemId,
   onCorrected,
 }: {
-  label: string
   currentValue: string | null
   displayValue: string
   displayClassName?: string
@@ -103,78 +107,72 @@ function CorrectableField({
   }
 
   return (
-    <div className="flex items-center justify-between py-2">
-      <span className="text-[11px] tracking-wide text-muted-foreground/70 uppercase">
-        {label}
-      </span>
-      <div className="relative flex items-center gap-1.5">
-        <AnimatePresence mode="wait">
-          {editing ? (
-            <motion.div
-              key="selector"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.1 }}
-              className="flex items-center gap-1"
-            >
-              {options.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => handleSelect(opt.value)}
-                  className={cn(
-                    "rounded px-2 py-0.5 text-xs transition-colors cursor-pointer",
-                    opt.value === currentValue
-                      ? "bg-foreground/10 font-medium"
-                      : "hover:bg-foreground/5",
-                    opt.className,
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
+    <div className="relative flex items-center gap-1.5">
+      <AnimatePresence mode="wait">
+        {editing ? (
+          <motion.div
+            key="selector"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.1 }}
+            className="flex items-center gap-1"
+          >
+            {options.map((opt) => (
               <button
+                key={opt.value}
                 type="button"
-                onClick={() => setEditing(false)}
-                className="ml-1 text-muted-foreground/50 hover:text-muted-foreground cursor-pointer"
+                onClick={() => handleSelect(opt.value)}
+                className={cn(
+                  "rounded px-2 py-0.5 text-xs transition-colors cursor-pointer",
+                  opt.value === currentValue
+                    ? "bg-foreground/10 font-medium"
+                    : "hover:bg-foreground/5",
+                  opt.className,
+                )}
               >
-                <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3" />
+                {opt.label}
               </button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="display"
-              initial={corrected ? { scale: 1.05 } : false}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", bounce: 0.3, duration: 0.2 }}
-              className="flex items-center gap-1.5"
+            ))}
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="ml-1 text-muted-foreground/50 hover:text-muted-foreground cursor-pointer"
             >
-              <span className={cn("text-sm", displayClassName)}>
-                {displayValue}
-              </span>
-              {corrected && (
-                <motion.span
-                  initial={{ opacity: 1, scale: 0.8 }}
-                  animate={{ opacity: 0, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  className="text-success"
-                >
-                  <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5" />
-                </motion.span>
-              )}
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="opacity-0 group-hover/field:opacity-100 transition-opacity text-muted-foreground/40 hover:text-muted-foreground cursor-pointer"
-                aria-label={`Edit ${label}`}
+              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3" />
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="display"
+            initial={corrected ? { scale: 1.05 } : false}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", bounce: 0.3, duration: 0.2 }}
+            className="flex items-center gap-1.5 cursor-pointer"
+            onClick={() => setEditing(true)}
+          >
+            <span className={cn("text-sm", displayClassName)}>
+              {displayValue}
+            </span>
+            {corrected ? (
+              <motion.span
+                initial={{ opacity: 1, scale: 0.8 }}
+                animate={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="text-success"
               >
-                <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={1.5} className="size-3" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5" />
+              </motion.span>
+            ) : (
+              <HugeiconsIcon
+                icon={PencilEdit01Icon}
+                strokeWidth={1.5}
+                className="size-3 text-muted-foreground/60 group-hover/field:text-muted-foreground transition-colors"
+              />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -210,8 +208,8 @@ function CorrectableThemes({
   }
 
   return (
-    <div className="flex items-start justify-between py-2">
-      <span className="text-[11px] tracking-wide text-muted-foreground/70 uppercase pt-1">
+    <div className="group/field flex items-start justify-between py-3">
+      <span className="text-[13px] text-muted-foreground pt-1">
         Themes
       </span>
       <div className="flex flex-wrap gap-1 justify-end items-center max-w-[65%]">
@@ -249,8 +247,8 @@ function CorrectableThemes({
           type="button"
           onClick={() => setEditing(!editing)}
           className={cn(
-            "transition-opacity text-muted-foreground/40 hover:text-muted-foreground cursor-pointer",
-            editing ? "opacity-100" : "opacity-0 group-hover/field:opacity-100",
+            "transition-colors cursor-pointer",
+            editing ? "text-muted-foreground/60" : "text-muted-foreground/20 group-hover/field:text-muted-foreground/60",
           )}
           aria-label="Edit themes"
         >
@@ -270,12 +268,12 @@ function CorrectableThemes({
 export function DetailPanel({ item, onClose }: DetailPanelProps) {
   const [toastVisible, setToastVisible] = useState(false)
 
-  // Show toast whenever a correction mutates (handled by child components via query invalidation)
-  // We track it at the panel level for the toast
   const showToast = () => {
     setToastVisible(true)
     setTimeout(() => setToastVisible(false), 2000)
   }
+
+  const conf = item.sentiment_confidence != null ? confidenceLabel(item.sentiment_confidence) : null
 
   return (
     <>
@@ -299,10 +297,10 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
       >
         <div className="p-6">
           {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div className="text-[11px] tracking-wide text-muted-foreground/70 uppercase">
-              Conversation
-            </div>
+          <div className="flex items-start justify-between mb-2">
+            <h2 className="text-lg font-medium tracking-tight text-foreground">
+              Feedback
+            </h2>
             <Button
               variant="ghost"
               size="icon-xs"
@@ -313,29 +311,41 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
             </Button>
           </div>
 
-          {/* User's voice — the centerpiece */}
-          <p className="text-[15px] leading-[1.7] text-foreground mb-8">
-            {item.content}
+          {/* Source + time context line */}
+          <p className="text-sm text-muted-foreground mb-6">
+            {item.source_name}{item.author ? ` · ${item.author}` : ""} · {formatRelativeTime(item.received_at)}
           </p>
 
-          {/* AI Analysis */}
-          <div className="mb-8">
-            <div className="flex items-center gap-1.5 mb-3">
-              <HugeiconsIcon
-                icon={SparklesIcon}
-                strokeWidth={1.5}
-                className="size-3.5 text-primary"
-              />
-              <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                AI Analysis
-              </span>
-            </div>
+          {/* User's voice — the centerpiece */}
+          <blockquote className="text-[16px] leading-[1.7] text-foreground mb-10 border-l-2 border-primary/30 pl-4">
+            {item.content}
+          </blockquote>
 
-            <div className="divide-y divide-border">
-              {/* Sentiment */}
-              <div className="group/field">
+          {/* AI Analysis */}
+          <section className="mb-10">
+            <h3 className="text-[14px] font-medium text-foreground mb-4">
+              AI Analysis
+            </h3>
+
+            {/* Summary — what the user wants first */}
+            {item.ai_summary && (
+              <p className="mb-4 text-sm text-foreground leading-relaxed">
+                {item.ai_summary}
+              </p>
+            )}
+
+            {/* Classification — correctable */}
+            <div className="rounded-lg border border-foreground/5 px-4">
+              <div className="group/field flex items-center justify-between py-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Sentiment</span>
+                  {conf && (
+                    <span className="text-[13px] font-mono text-muted-foreground tabular-nums">
+                      {Math.round(item.sentiment_confidence! * 100)}%
+                    </span>
+                  )}
+                </div>
                 <CorrectableField
-                  label="Sentiment"
                   currentValue={item.sentiment}
                   displayValue={item.sentiment ?? "Unclassified"}
                   displayClassName={
@@ -348,10 +358,11 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
                 />
               </div>
 
-              {/* Urgency */}
-              <div className="group/field">
+              <div className="border-t border-foreground/5" />
+
+              <div className="group/field flex items-center justify-between py-3">
+                <span className="text-sm text-muted-foreground">Urgency</span>
                 <CorrectableField
-                  label="Urgency"
                   currentValue={item.urgency}
                   displayValue={item.urgency ?? "Unclassified"}
                   displayClassName={
@@ -364,71 +375,15 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
                 />
               </div>
 
-              {/* Themes */}
               {item.themes && item.themes.length > 0 && (
-                <div className="group/field">
+                <>
+                  <div className="border-t border-foreground/5" />
                   <CorrectableThemes themes={item.themes} itemId={item.id} onCorrected={showToast} />
-                </div>
-              )}
-
-              {/* Confidence (read-only) */}
-              {item.sentiment_confidence != null && (
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-[11px] tracking-wide text-muted-foreground/70 uppercase">
-                    Confidence
-                  </span>
-                  <span className="text-sm font-mono text-muted-foreground tabular-nums">
-                    {Math.round(item.sentiment_confidence * 100)}%
-                  </span>
-                </div>
-              )}
-
-              {/* Summary */}
-              {item.ai_summary && (
-                <div className="py-2">
-                  <span className="text-[11px] tracking-wide text-muted-foreground/70 uppercase block mb-1">
-                    Summary
-                  </span>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.ai_summary}
-                  </p>
-                </div>
+                </>
               )}
             </div>
-          </div>
+          </section>
 
-          {/* Context */}
-          <div>
-            <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase block mb-3">
-              Context
-            </span>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground/70">Source</span>
-                <span className="text-foreground">{item.source_name}</span>
-              </div>
-              {item.author && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground/70">Author</span>
-                  <span className="text-foreground">{item.author}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted-foreground/70">Received</span>
-                <span className="text-foreground">
-                  {formatRelativeTime(item.received_at)}
-                </span>
-              </div>
-              {item.processed_at && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground/70">Processed</span>
-                  <span className="text-foreground">
-                    {formatRelativeTime(item.processed_at)}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </motion.aside>
 
