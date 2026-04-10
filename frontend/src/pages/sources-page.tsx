@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { useSources } from "@/hooks/use-sources"
-import SourcesList from "@/components/sources-list"
+import { SourcesList } from "@/components/sources-list"
 import { CreateSourceForm } from "@/components/create-source-form"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"

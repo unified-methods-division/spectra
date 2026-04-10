@@ -23,6 +23,39 @@ export type TaskStatus = {
   error?: string
 }
 
+export type Sentiment = "positive" | "negative" | "neutral" | "mixed"
+
+export type Urgency = "low" | "medium" | "high" | "critical"
+
+export type FeedbackItem = {
+  id: string
+  source: string
+  source_name: string
+  content: string
+  author: string | null
+  sentiment: Sentiment | null
+  sentiment_confidence: number | null
+  urgency: Urgency | null
+  themes: string[] | null
+  ai_summary: string | null
+  received_at: string
+  processed_at: string | null
+}
+
+export type FeedbackItemsResponse = {
+  count: number
+  next: string | null
+  previous: string | null
+  results: FeedbackItem[]
+}
+
+export type CorrectionPayload = {
+  feedback_item: string
+  field_corrected: "sentiment" | "themes" | "urgency"
+  ai_value: unknown
+  human_value: unknown
+}
+
 export type ProcessingStatus = {
   source_id: string
   classification: {

@@ -39,6 +39,7 @@
   - `**What the build did:**` (numbered list, concrete implementation artifacts)
   - `**Design decisions to know for interviews:**` (short bullets, tradeoff-focused)
   - `**Files to study:**` (markdown table with `File:Lines` and `What to know`)
-- `Files to study` must use precise `path:line-line` references where possible (not generic file names only); prefer markdown links to the repo path with line anchors (e.g. ``[`path:1-10`](path#L1-L10)``) for navigation.
+- `Files to study` must use precise `path:line-line` references where possible (not generic file names only).
+- Prefer clickable markdown links with line anchors for navigation (e.g. ``[`path:1-10`](path#L1-L10)``).
 - Keep build notes concrete and code-referential; avoid generic or high-level process commentary.
 - Do not add/modify grading content unless explicitly requested; default to appending build notes only.

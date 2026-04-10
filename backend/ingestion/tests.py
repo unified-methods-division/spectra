@@ -107,7 +107,7 @@ class TenantIsolationTests(TenantHeaderMixin, APITestCase):
         """GET /feedback-items as tenant A → only A's items returned"""
         self.set_tenant(self.tenant_a)
         response = self.client.get(reverse("feedback-items-list"))
-        item_ids = [i["id"] for i in response.data]
+        item_ids = [i["id"] for i in response.data["results"]]
         self.assertIn(str(self.item_a.id), item_ids)
         self.assertNotIn(str(self.item_b.id), item_ids)
 

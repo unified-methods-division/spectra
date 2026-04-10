@@ -1,9 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ingestion.models import Source
+
+from .serializers import CorrectionSerializer
 
 
 class ProcessingStatusView(APIView):
@@ -44,3 +47,10 @@ class ProcessingStatusView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class CorrectionCreateView(CreateAPIView):
+    serializer_class = CorrectionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.tenant)

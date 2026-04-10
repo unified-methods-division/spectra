@@ -40,3 +40,24 @@ class FeedbackItemSerializer(serializers.ModelSerializer):
             "embedding",
             "processed_at",
         ]
+
+
+class FeedbackItemListSerializer(serializers.ModelSerializer):
+    source_name = serializers.CharField(source="source.name", read_only=True)
+
+    class Meta:
+        model = FeedbackItem
+        fields = [
+            "id",
+            "source",
+            "source_name",
+            "content",
+            "author",
+            "sentiment",
+            "sentiment_confidence",
+            "urgency",
+            "themes",
+            "ai_summary",
+            "received_at",
+            "processed_at",
+        ]

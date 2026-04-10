@@ -6,13 +6,24 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework import status, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import FeedbackItem, Source
-from .serializers import FeedbackItemSerializer, SourceSerializer
+from .serializers import (
+    FeedbackItemListSerializer,
+    FeedbackItemSerializer,
+    SourceSerializer,
+)
 from .tasks import parse_uploaded_feedback_file
+
+
+class FeedbackItemPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 100
 
 
 class SourceViewSet(viewsets.ModelViewSet):
@@ -28,9 +39,45 @@ class SourceViewSet(viewsets.ModelViewSet):
 
 class FeedbackItemViewSet(viewsets.ModelViewSet):
     serializer_class = FeedbackItemSerializer
+    pagination_class = FeedbackItemPagination
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return FeedbackItemListSerializer
+        return FeedbackItemSerializer
 
     def get_queryset(self):
-        return FeedbackItem.objects.all().order_by("-received_at")
+        qs = FeedbackItem.objects.select_related("source").order_by("-received_at")
+
+        sentiment = self.request.query_params.get("sentiment")
+        if sentiment:
+            qs = qs.filter(sentiment=sentiment)
+
+        urgency = self.request.query_params.get("urgency")
+        if urgency:
+            qs = qs.filter(urgency=urgency)
+
+        source = self.request.query_params.get("source")
+        if source:
+            qs = qs.filter(source_id=source)
+
+        theme = self.request.query_params.get("theme")
+        if theme:
+            qs = qs.filter(themes__contains=[theme])
+
+        search = self.request.query_params.get("search")
+        if search:
+            qs = qs.filter(content__icontains=search)
+
+        date_from = self.request.query_params.get("date_from")
+        if date_from:
+            qs = qs.filter(received_at__gte=date_from)
+
+        date_to = self.request.query_params.get("date_to")
+        if date_to:
+            qs = qs.filter(received_at__lte=date_to)
+
+        return qs
 
 
 class UploadFeedbackFileView(APIView):

@@ -8,4 +8,9 @@ urlpatterns = [
         views.ProcessingStatusView.as_view(),
         name="processing-status",
     ),
+    path(
+        "corrections/",
+        views.CorrectionCreateView.as_view(),
+        name="correction-create",
+    ),
 ]

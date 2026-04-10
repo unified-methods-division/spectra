@@ -2,8 +2,8 @@ import { Link, Outlet, useLocation } from "react-router"
 import { cn } from "@/lib/utils"
 
 const navItems = [
-  { label: "Sources", href: "/sources" },
   { label: "Explorer", href: "/explorer" },
+  { label: "Sources", href: "/sources" },
   { label: "Dashboard", href: "/dashboard" },
   { label: "Themes", href: "/themes" },
 ]
