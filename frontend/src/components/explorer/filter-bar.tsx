@@ -116,7 +116,11 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
           }
         >
           <SelectTrigger size="sm" className="text-xs">
-            <SelectValue placeholder="Sentiment" />
+            <SelectValue placeholder="Sentiment">
+              {filters.sentiment
+                ? SENTIMENT_OPTIONS.find((o) => o.value === filters.sentiment)?.label
+                : "Sentiment"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All sentiments</SelectItem>
@@ -147,7 +151,11 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
           }
         >
           <SelectTrigger size="sm" className="text-xs">
-            <SelectValue placeholder="Source" />
+            <SelectValue placeholder="Source">
+              {filters.source
+                ? sources.find((s) => s.id === filters.source)?.name
+                : "Source"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All sources</SelectItem>
