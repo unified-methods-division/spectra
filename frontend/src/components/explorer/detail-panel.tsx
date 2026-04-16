@@ -10,6 +10,8 @@ import type { FeedbackItem, Sentiment, Urgency } from "@/types/api"
 type DetailPanelProps = {
   item: FeedbackItem
   onClose: () => void
+  /** Slug matches `?theme=`; only used from Explorer */
+  onFilterByTheme?: (themeSlug: string) => void
 }
 
 const SENTIMENT_OPTIONS: { value: Sentiment; label: string; className: string }[] = [
@@ -181,10 +183,12 @@ function CorrectableThemes({
   themes,
   itemId,
   onCorrected,
+  onFilterByTheme,
 }: {
   themes: string[]
   itemId: string
   onCorrected: () => void
+  onFilterByTheme?: (themeSlug: string) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
@@ -213,26 +217,43 @@ function CorrectableThemes({
         Themes
       </span>
       <div className="flex flex-wrap gap-1 justify-end items-center max-w-[65%]">
-        {themes.map((theme) => (
-          <span
-            key={theme}
-            className={cn(
-              "inline-flex items-center gap-1 bg-foreground/8 px-1.5 py-0.5 rounded text-xs font-mono text-muted-foreground",
-              removing === theme && "opacity-50",
-            )}
-          >
-            {theme}
-            {editing && (
-              <button
-                type="button"
-                onClick={() => handleRemoveTheme(theme)}
-                className="text-muted-foreground/40 hover:text-destructive cursor-pointer"
-              >
-                <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-2.5" />
-              </button>
-            )}
-          </span>
-        ))}
+        {themes.map((theme) =>
+          !editing && onFilterByTheme ? (
+            <button
+              key={theme}
+              type="button"
+              onClick={() => onFilterByTheme(theme)}
+              className={cn(
+                "inline-flex min-h-6 touch-manipulation items-center gap-1 rounded bg-foreground/8 px-1.5 py-0.5 text-xs font-mono text-muted-foreground transition-colors",
+                "cursor-pointer hover:bg-foreground/15 hover:text-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                removing === theme && "opacity-50",
+              )}
+              aria-label={`Filter by theme ${theme}`}
+            >
+              {theme}
+            </button>
+          ) : (
+            <span
+              key={theme}
+              className={cn(
+                "inline-flex items-center gap-1 bg-foreground/8 px-1.5 py-0.5 rounded text-xs font-mono text-muted-foreground",
+                removing === theme && "opacity-50",
+              )}
+            >
+              {theme}
+              {editing && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTheme(theme)}
+                  className="text-muted-foreground/40 hover:text-destructive cursor-pointer"
+                >
+                  <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-2.5" />
+                </button>
+              )}
+            </span>
+          ),
+        )}
         {corrected && (
           <motion.span
             initial={{ opacity: 1, scale: 0.8 }}
@@ -265,7 +286,7 @@ function CorrectableThemes({
 
 /* ─── Main panel ─── */
 
-export function DetailPanel({ item, onClose }: DetailPanelProps) {
+export function DetailPanel({ item, onClose, onFilterByTheme }: DetailPanelProps) {
   const [toastVisible, setToastVisible] = useState(false)
 
   const showToast = () => {
@@ -382,7 +403,12 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
               {item.themes && item.themes.length > 0 && (
                 <>
                   <div className="border-t border-foreground/5" />
-                  <CorrectableThemes themes={item.themes} itemId={item.id} onCorrected={showToast} />
+                  <CorrectableThemes
+                    themes={item.themes}
+                    itemId={item.id}
+                    onCorrected={showToast}
+                    onFilterByTheme={onFilterByTheme}
+                  />
                 </>
               )}
             </div>

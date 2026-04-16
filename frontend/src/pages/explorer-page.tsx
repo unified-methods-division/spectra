@@ -153,6 +153,10 @@ export function ExplorerPage() {
                 index={i}
                 isSelected={selectedItem?.id === item.id}
                 onClick={() => setSelectedItem(item)}
+                onThemeClick={(slug) => {
+                  setSelectedItem(null)
+                  onFilterChange({ ...filters, theme: slug, page: 1 })
+                }}
               />
             ))}
           </div>
@@ -211,6 +215,10 @@ export function ExplorerPage() {
           <DetailPanel
             item={selectedItem}
             onClose={() => setSelectedItem(null)}
+            onFilterByTheme={(slug) => {
+              setSelectedItem(null)
+              onFilterChange({ ...filters, theme: slug, page: 1 })
+            }}
           />
         )}
       </AnimatePresence>

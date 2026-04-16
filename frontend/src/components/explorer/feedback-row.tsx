@@ -1,12 +1,15 @@
 import { cn, formatRelativeTime } from "@/lib/utils"
 import { motion } from "motion/react"
 import type { FeedbackItem } from "@/types/api"
+import type { KeyboardEvent } from "react"
 
 type FeedbackRowProps = {
   item: FeedbackItem
   index: number
   isSelected: boolean
   onClick: () => void
+  /** Theme values are slugs; updates explorer `?theme=` when set */
+  onThemeClick?: (themeSlug: string) => void
 }
 
 const SENTIMENT_STYLES: Record<string, { text: string; bg: string }> = {
@@ -16,12 +19,25 @@ const SENTIMENT_STYLES: Record<string, { text: string; bg: string }> = {
   mixed: { text: "text-warning", bg: "bg-warning/10" },
 }
 
-export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowProps) {
+export function FeedbackRow({
+  item,
+  index,
+  isSelected,
+  onClick,
+  onThemeClick,
+}: FeedbackRowProps) {
   const sentiment = item.sentiment ? SENTIMENT_STYLES[item.sentiment] : null
 
+  const handleRowKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") return
+    e.preventDefault()
+    onClick()
+  }
+
   return (
-    <motion.button
-      type="button"
+    <motion.div
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, x: -6 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
@@ -30,6 +46,7 @@ export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowPro
         ease: [0.23, 1, 0.32, 1],
       }}
       onClick={onClick}
+      onKeyDown={handleRowKeyDown}
       className={cn(
         "group relative w-full text-left py-5 pl-4 pr-3 cursor-pointer transition-colors duration-100",
         "hover:bg-foreground/[0.02]",
@@ -65,14 +82,34 @@ export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowPro
         {item.themes && item.themes.length > 0 && (
           <>
             <span className="flex items-center gap-1">
-              {item.themes.slice(0, 3).map((theme) => (
-                <span
-                  key={theme}
-                  className="bg-foreground/8 px-1.5 py-px rounded text-xs font-mono text-muted-foreground"
-                >
-                  {theme}
-                </span>
-              ))}
+              {item.themes.slice(0, 3).map((theme) =>
+                onThemeClick ? (
+                  <button
+                    key={theme}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onThemeClick(theme)
+                    }}
+                    className={cn(
+                      "min-h-6 touch-manipulation rounded px-1.5 py-px text-left text-xs font-mono text-muted-foreground",
+                      "bg-foreground/8 transition-colors cursor-pointer",
+                      "hover:bg-foreground/15 hover:text-foreground",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    )}
+                    aria-label={`Filter by theme ${theme}`}
+                  >
+                    {theme}
+                  </button>
+                ) : (
+                  <span
+                    key={theme}
+                    className="bg-foreground/8 px-1.5 py-px rounded text-xs font-mono text-muted-foreground"
+                  >
+                    {theme}
+                  </span>
+                ),
+              )}
               {item.themes.length > 3 && (
                 <span className="text-xs text-muted-foreground/50">
                   +{item.themes.length - 3}
@@ -90,6 +127,6 @@ export function FeedbackRow({ item, index, isSelected, onClick }: FeedbackRowPro
           {formatRelativeTime(item.received_at)}
         </span>
       </div>
-    </motion.button>
+    </motion.div>
   )
 }
