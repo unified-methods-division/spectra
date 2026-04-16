@@ -8,17 +8,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons"
 import { motion, AnimatePresence } from "motion/react"
 import type { ExplorerFilters } from "@/hooks/use-explorer"
-import type { Source } from "@/types/api"
+import type { Source, Theme } from "@/types/api"
 
 type FilterBarProps = {
   filters: ExplorerFilters
   onChange: (filters: ExplorerFilters) => void
   sources: Source[]
+  themes: Theme[]
 }
 
 const SENTIMENT_OPTIONS = [
@@ -33,7 +33,11 @@ type ActiveFilter = {
   label: string
 }
 
-function getActiveFilters(filters: ExplorerFilters, sources: Source[]): ActiveFilter[] {
+function getActiveFilters(
+  filters: ExplorerFilters,
+  sources: Source[],
+  themes: Theme[],
+): ActiveFilter[] {
   const active: ActiveFilter[] = []
   if (filters.sentiment) {
     active.push({
@@ -51,12 +55,19 @@ function getActiveFilters(filters: ExplorerFilters, sources: Source[]): ActiveFi
   if (filters.date_to) {
     active.push({ key: "date_to", label: `Until ${filters.date_to}` })
   }
+  if (filters.theme) {
+    const th = themes.find((t) => t.slug === filters.theme)
+    active.push({
+      key: "theme",
+      label: th?.name ?? filters.theme,
+    })
+  }
   return active
 }
 
-export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
+export function FilterBar({ filters, onChange, sources, themes }: FilterBarProps) {
   const [searchValue, setSearchValue] = useState(filters.search ?? "")
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +88,7 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
     }
   }, [])
 
-  const activeFilters = getActiveFilters(filters, sources)
+  const activeFilters = getActiveFilters(filters, sources, themes)
 
   const clearFilter = (key: keyof ExplorerFilters) => {
     const next = { ...filters, page: 1 }
@@ -162,6 +173,39 @@ export function FilterBar({ filters, onChange, sources }: FilterBarProps) {
             {sources.map((src) => (
               <SelectItem key={src.id} value={src.id}>
                 {src.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Theme (slug matches FeedbackItem.themes + Theme.slug) */}
+        <Select
+          value={filters.theme ?? ""}
+          onValueChange={(val) =>
+            onChange({ ...filters, theme: val || undefined, page: 1 })
+          }
+        >
+          <SelectTrigger
+            size="sm"
+            className="text-xs max-w-44 min-w-28"
+            aria-label="Filter by theme"
+          >
+            <SelectValue placeholder="Theme">
+              {filters.theme
+                ? themes.find((t) => t.slug === filters.theme)?.name ?? "Theme"
+                : "Theme"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All themes</SelectItem>
+            {themes.map((t) => (
+              <SelectItem key={t.id} value={t.slug}>
+                <span className="flex items-baseline justify-between gap-3">
+                  <span className="truncate">{t.name}</span>
+                  <span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground/70">
+                    {t.item_count}
+                  </span>
+                </span>
               </SelectItem>
             ))}
           </SelectContent>

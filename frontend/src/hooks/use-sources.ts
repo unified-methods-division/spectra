@@ -38,13 +38,33 @@ export function useUploadFile(sourceId: string) {
   })
 }
 
-export function useTaskStatus(taskId: string | null) {
+type UseTaskStatusOptions = {
+  /** When the task reaches `success`, invalidates list + processing polling for this source. */
+  sourceId?: string | null
+}
+
+export function useTaskStatus(taskId: string | null, options?: UseTaskStatusOptions) {
+  const qc = useQueryClient()
+  const sourceId = options?.sourceId ?? null
+
   return useQuery({
     queryKey: ["tasks", taskId],
-    queryFn: () => apiGet<TaskStatus>(`/api/ingestion/uploads/tasks/${taskId}/`),
+    queryFn: async ({ signal }) => {
+      const data = await apiGet<TaskStatus>(
+        `/api/ingestion/uploads/tasks/${taskId}/`,
+        { signal },
+      )
+      if (data.status === "success" && sourceId) {
+        await Promise.all([
+          qc.invalidateQueries({ queryKey: ["sources"] }),
+          qc.invalidateQueries({ queryKey: ["processing-status", sourceId] }),
+        ])
+      }
+      return data
+    },
     enabled: !!taskId,
-    refetchInterval: (query) => {
-      const status = query.state.data?.status
+    refetchInterval: (q) => {
+      const status = q.state.data?.status
       if (status === "success" || status === "failure") return false
       return 2000
     },

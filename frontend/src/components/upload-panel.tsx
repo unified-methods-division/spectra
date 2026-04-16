@@ -1,16 +1,31 @@
-import { useCallback, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { useUploadFile, useTaskStatus } from "@/hooks/use-sources"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
 
+export type UploadPanelStep = "select" | "uploading" | "tracking"
+
 type Props = {
   sourceId: string
   onClose: () => void
+  onStepChange?: (step: UploadPanelStep) => void
 }
 
-type Step = "select" | "uploading" | "tracking"
+type PanelState = {
+  step: UploadPanelStep
+  file: File | null
+  taskId: string | null
+  dragOver: boolean
+}
+
+const initialPanelState: PanelState = {
+  step: "select",
+  file: null,
+  taskId: null,
+  dragOver: false,
+}
 
 const stepTransition = {
   initial: { opacity: 0 },
@@ -19,22 +34,18 @@ const stepTransition = {
   transition: { duration: 0.15 },
 }
 
-export function UploadPanel({ sourceId, onClose }: Props) {
-  const [step, setStep] = useState<Step>("select")
-  const [file, setFile] = useState<File | null>(null)
-  const [taskId, setTaskId] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
+export function UploadPanel({ sourceId, onClose, onStepChange }: Props) {
+  const [panel, setPanel] = useState<PanelState>(initialPanelState)
+  const { step, file, taskId, dragOver } = panel
   const inputRef = useRef<HTMLInputElement>(null)
 
   const upload = useUploadFile(sourceId)
-  const task = useTaskStatus(taskId)
+  const task = useTaskStatus(taskId, { sourceId })
 
-  const reset = useCallback(() => {
-    setStep("select")
-    setFile(null)
-    setTaskId(null)
-    setDragOver(false)
-  }, [])
+  function reset() {
+    setPanel(initialPanelState)
+    onStepChange?.("select")
+  }
 
   function handleClose() {
     reset()
@@ -43,18 +54,22 @@ export function UploadPanel({ sourceId, onClose }: Props) {
 
   function handleFileChange(f: File | null) {
     if (!f) return
-    setFile(f)
+    setPanel((p) => ({ ...p, file: f }))
   }
 
   function handleUpload() {
     if (!file) return
-    setStep("uploading")
+    setPanel((p) => ({ ...p, step: "uploading" }))
+    onStepChange?.("uploading")
     upload.mutate(file, {
       onSuccess: (data) => {
-        setTaskId(data.task_id)
-        setStep("tracking")
+        setPanel((p) => ({ ...p, step: "tracking", taskId: data.task_id }))
+        onStepChange?.("tracking")
       },
-      onError: () => setStep("select"),
+      onError: () => {
+        setPanel((p) => ({ ...p, step: "select" }))
+        onStepChange?.("select")
+      },
     })
   }
 
@@ -77,12 +92,16 @@ export function UploadPanel({ sourceId, onClose }: Props) {
                         : "border-foreground/10 bg-foreground/3 text-muted-foreground hover:border-foreground/20"
                   }`}
                   onClick={() => inputRef.current?.click()}
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-                  onDragLeave={() => setDragOver(false)}
+                  onDragOver={(e) => { e.preventDefault(); setPanel((p) => ({ ...p, dragOver: true })) }}
+                  onDragLeave={() => setPanel((p) => ({ ...p, dragOver: false }))}
                   onDrop={(e) => {
                     e.preventDefault()
-                    setDragOver(false)
-                    handleFileChange(e.dataTransfer.files[0] ?? null)
+                    const dropped = e.dataTransfer.files[0]
+                    setPanel((p) => ({
+                      ...p,
+                      dragOver: false,
+                      ...(dropped ? { file: dropped } : {}),
+                    }))
                   }}
                 >
                   {file ? (

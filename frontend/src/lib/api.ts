@@ -34,8 +34,12 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json()
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+export async function apiGet<T>(
+  path: string,
+  options?: { signal?: AbortSignal },
+): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
+    signal: options?.signal,
     headers: headers({ "Content-Type": "application/json" }),
     credentials: "include",
   })

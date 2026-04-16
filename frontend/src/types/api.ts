@@ -56,6 +56,17 @@ export type CorrectionPayload = {
   human_value: unknown
 }
 
+export type Theme = {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+  source: "manual" | "discovered"
+  item_count: number
+  first_seen_at: string | null
+  created_at: string
+}
+
 export type ProcessingStatus = {
   source_id: string
   classification: {

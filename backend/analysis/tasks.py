@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from celery import chain, shared_task
+from themes.tasks import discover_themes_for_source
 from django.db import transaction
 from django.utils import timezone
 
@@ -239,9 +240,10 @@ def embed_feedback_batch(
 
 @shared_task(name="analysis.process_source")
 def process_source(source_id: str) -> None:
-    """Full pipeline: classify → embed.  Dispatches as a Celery chain."""
+    """classify → embed → theme discovery (tenant-wide)."""
     pipeline = chain(
         classify_feedback_batch.si(source_id),
         embed_feedback_batch.si(source_id),
+        discover_themes_for_source.si(source_id),
     )
     pipeline.apply_async()

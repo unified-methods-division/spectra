@@ -159,3 +159,12 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+
+from celery.schedules import crontab  # noqa: E402
+
+CELERY_BEAT_SCHEDULE = {
+    "discover-themes-daily": {
+        "task": "themes.discover_themes_for_all_tenants",
+        "schedule": crontab(hour=3, minute=0),
+    },
+}

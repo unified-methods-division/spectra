@@ -1,19 +1,67 @@
 import { useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
+import { useSearchParams } from "react-router"
 import { useFeedbackItems, type ExplorerFilters } from "@/hooks/use-explorer"
 import { useSources } from "@/hooks/use-sources"
+import { useThemes } from "@/hooks/use-themes"
 import { FilterBar } from "@/components/explorer/filter-bar"
 import { FeedbackRow } from "@/components/explorer/feedback-row"
 import { DetailPanel } from "@/components/explorer/detail-panel"
 import { Button } from "@/components/ui/button"
 import type { FeedbackItem } from "@/types/api"
 
+function readFilters(searchParams: URLSearchParams): ExplorerFilters {
+  const pageRaw = searchParams.get("page")
+  const page = pageRaw ? Number(pageRaw) : undefined
+
+  const get = (key: keyof ExplorerFilters) => searchParams.get(key) ?? undefined
+
+  return {
+    page: page && Number.isFinite(page) && page > 0 ? page : 1,
+    sentiment: get("sentiment"),
+    urgency: get("urgency"),
+    source: get("source"),
+    theme: get("theme"),
+    search: get("search"),
+    date_from: get("date_from"),
+    date_to: get("date_to"),
+  }
+}
+
 export function ExplorerPage() {
-  const [filters, setFilters] = useState<ExplorerFilters>({ page: 1 })
+  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedItem, setSelectedItem] = useState<FeedbackItem | null>(null)
 
+  const filters = readFilters(searchParams)
   const { data, isLoading, error } = useFeedbackItems(filters)
   const { data: sources } = useSources()
+  const { data: themes = [] } = useThemes()
+
+  const onFilterChange = (next: ExplorerFilters) => {
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev)
+        const setOrDel = (key: keyof ExplorerFilters, value: unknown) => {
+          if (value === undefined || value === null || value === "") {
+            p.delete(key)
+            return
+          }
+          p.set(key, String(value))
+        }
+
+        setOrDel("page", next.page ?? 1)
+        setOrDel("sentiment", next.sentiment)
+        setOrDel("urgency", next.urgency)
+        setOrDel("source", next.source)
+        setOrDel("theme", next.theme)
+        setOrDel("search", next.search)
+        setOrDel("date_from", next.date_from)
+        setOrDel("date_to", next.date_to)
+        return p
+      },
+      { replace: true },
+    )
+  }
 
   const totalPages = data ? Math.ceil(data.count / 20) : 0
   const currentPage = filters.page ?? 1
@@ -48,8 +96,9 @@ export function ExplorerPage() {
         <div className="sticky top-0 z-30 -mx-10 px-10 py-3 bg-background/80 backdrop-blur-xl">
           <FilterBar
             filters={filters}
-            onChange={setFilters}
+            onChange={onFilterChange}
             sources={sources ?? []}
+            themes={themes}
           />
         </div>
 
@@ -131,7 +180,7 @@ export function ExplorerPage() {
               variant="ghost"
               size="sm"
               onClick={() =>
-                setFilters((f) => ({ ...f, page: currentPage - 1 }))
+                onFilterChange({ ...filters, page: currentPage - 1 })
               }
               disabled={currentPage <= 1}
               className="text-xs"
@@ -145,7 +194,7 @@ export function ExplorerPage() {
               variant="ghost"
               size="sm"
               onClick={() =>
-                setFilters((f) => ({ ...f, page: currentPage + 1 }))
+                onFilterChange({ ...filters, page: currentPage + 1 })
               }
               disabled={!data.next}
               className="text-xs"

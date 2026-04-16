@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { ProcessingStatusBadge } from "./processing-status-badge"
-import { UploadPanel } from "./upload-panel"
+import { UploadPanel, type UploadPanelStep } from "./upload-panel"
 import { formatRelativeTime, sourceTypeCopy } from "@/lib/utils"
 import type { Source } from "@/types/api"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -77,6 +78,14 @@ function SourceRow({
 }) {
   const counts = (source.config?.ingestion_counts ?? {}) as Record<string, number>
   const itemCount = counts.created ?? 0
+  const [uploadPanelStep, setUploadPanelStep] = useState<UploadPanelStep>("select")
+
+  useEffect(() => {
+    if (isUploading) setUploadPanelStep("select")
+  }, [isUploading])
+
+  const showImportProgressSubtitle =
+    isUploading && (uploadPanelStep === "uploading" || uploadPanelStep === "tracking")
 
   return (
     <div className="group relative">
@@ -99,15 +108,19 @@ function SourceRow({
             <span>{sourceTypeCopy(source.source_type).label}</span>
             <span aria-hidden>&middot;</span>
             <span>
-              {source.last_synced_at
-                ? formatRelativeTime(source.last_synced_at)
-                : sourceTypeCopy(source.source_type).emptyTimestamp}
+              {showImportProgressSubtitle
+                ? "Import in progress…"
+                : source.last_synced_at
+                  ? formatRelativeTime(source.last_synced_at)
+                  : itemCount > 0
+                    ? "Imported"
+                    : sourceTypeCopy(source.source_type).emptyTimestamp}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <ProcessingStatusBadge source={source} />
+          {!isUploading && <ProcessingStatusBadge source={source} />}
           <SourceAction
             source={source}
             isUploading={isUploading}
@@ -126,7 +139,11 @@ function SourceRow({
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <UploadPanel sourceId={source.id} onClose={onCloseUpload} />
+            <UploadPanel
+              sourceId={source.id}
+              onClose={onCloseUpload}
+              onStepChange={setUploadPanelStep}
+            />
           </motion.div>
         )}
       </AnimatePresence>
