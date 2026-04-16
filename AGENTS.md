@@ -10,6 +10,8 @@
 - No trailing summaries of what you just did — the user can read the diff.
 - Apply your own standards to your own output: if you dock the student for something, don't do it in your tightened/ideal version. The student catches inconsistency immediately.
 - When grading hypothetical scenarios (e.g., "explain to a client"), don't dock for referencing future product surfaces — that's natural in a pitch context.
+- Prefers TDD workflow for backend builds ("TDD mindset" — RED/GREEN/REFACTOR cycles).
+- Commit messages should use conventional commit format with scope (e.g., `feat(analysis):`, `refactor(repo):`).
 
 ## Runtime Requirements
 
@@ -30,6 +32,9 @@
 - Backend Postgres is Neon-first via `DATABASE_URL` and `dj-database-url`; local Docker Compose usually runs Redis (and the app) without a bundled Postgres container.
 - Neon-style `DATABASE_URL` examples should include `sslmode=require` and `channel_binding=require` in the query string when the stack expects them.
 - M1 is complete (Steps 1.1-1.5). Deferred items: Source.config overloaded, no mid-task progress, serializer leaks config, temp file local-only, no Postgres RLS.
+- M2.5 built: tenant-wide theme discovery (`themes/discovery.py`: sklearn HDBSCAN + LLM summarize + cosine merge; writes `Theme.slug` onto `FeedbackItem.themes` for `?theme=` filtering); `process_source` chains classify → embed → `discover_themes_for_source`; `GET/POST api/themes/` + Themes UI; Explorer theme filter + URL-driven filters; `python manage.py reset_app_data` keeps tenants only. 35 backend tests total.
+- `scikit-learn>=1.6.0` is a backend dependency (provides `sklearn.cluster.HDBSCAN` for theme clustering).
+- Git repo was moved from `backend/` (where `uv init` created it) to the project root `feedback-intelligence/`.
 
 ## Build Notes Format (Persistent)
 
