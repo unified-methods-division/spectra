@@ -1,0 +1,83 @@
+---
+description: Conventional Commits 1.0.0 for suggested and generated commit messages
+alwaysApply: true
+---
+
+# Commit messages (Conventional Commits)
+
+Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+
+## Format
+
+```text
+<type>[optional scope][optional !]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+- **One blank line** between subject and body.
+- **Subject:** imperative mood (“add”, not “added”), **lowercase type**, no trailing period, aim **≤72 chars** total line. Say **what changed** (behavior, API, invariant)—not “work was done on X.”
+- **Scope:** optional noun in parentheses; use a real area of this repo when it helps: `frontend`, `ingestion`, `analysis`, `trends`, `core`, `repo` (tooling/layout), `docs`, `colearn` (only if the commit is mostly curriculum/docs there).
+- **Breaking changes:** `feat(api)!: …` and/or footer `BREAKING CHANGE: …` (uppercase token).
+
+## Types (pick one primary)
+
+| Type | Use for |
+|------|--------|
+| `feat` | New behavior / API / UI capability |
+| `fix` | Bug fix |
+| `perf` | Performance-only change |
+| `refactor` | Behavior-preserving code move/reshape |
+| `test` | Tests only |
+| `build` | Build system, deps, packaging |
+| `ci` | CI config |
+| `chore` | Maintenance, ignores, non-code churn |
+| `docs` | README, comments meant as docs |
+| `revert` | Reverts a prior commit (reference SHA in footer if useful) |
+
+Other types from the ecosystem (`style`, etc.) are fine if they fit; **do not** invent vague types.
+
+## Vocabulary (meaningful, not marketing)
+
+**Avoid filler / LLM-slop verbs** in subject and body: _enhance_, _introduce_, _leverage_, _streamline_, _facilitate_, _empower_, _utilize_, _holistic_, _seamless_, _robust_, _comprehensive_, _various_, _delve_, _optimize_ (unless the commit is a measured perf change—then use `perf` and name the metric).
+
+**Prefer concrete verbs** that a reviewer can map to a diff: `add`, `remove`, `fix`, `split`, `merge`, `rename`, `move`, `wire`, `guard`, `validate`, `tighten`, `relax`, `narrow`, `widen`, `cache`, `persist`, `scope`, `tenant-scope`, `debounce`, `truncate`, `ignore`, `bump`, `drop`, `raise` (e.g. limit), `lower`.
+
+**Bad → better (subject):**
+
+- `feat(x): enhance validation` → `feat(x): reject invalid human_value for theme corrections`
+- `fix(x): improve error handling` → `fix(x): return 422 when theme slug unknown`
+- `chore(x): introduce helper` → `chore(x): extract theme slug normalizer`
+
+## Body (when needed)
+
+- Prefer **3–6 short bullets**, each an **outcome** (what changed for the user or system), not a file-by-file narration.
+- Avoid repeating the subject; avoid duplicate bullets that say the same thing with different components.
+- No markdown heading inside the commit body unless the user asked for it.
+
+## Examples (good)
+
+```text
+feat(frontend): click themes in explorer to apply list filter
+
+- thread filter callback from ExplorerPage through detail panel and rows
+```
+
+```text
+chore(repo): ignore Celery Beat schedule database
+
+- add celerybeat-schedule* to gitignore
+```
+
+```text
+fix(analysis): cap batch size when Redis payload exceeds limit
+```
+
+## Examples (bad)
+
+- Subject too long or title-case Every Word.
+- Slop verbs (`enhance`, `introduce`, `leverage`, …) with no observable behavior.
+- Body that only lists filenames without intent (`- Update foo.tsx`).
+- Multiple unrelated concerns in one commit message (split commits instead).
