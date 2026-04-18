@@ -53,4 +53,11 @@ class CorrectionCreateView(CreateAPIView):
     serializer_class = CorrectionSerializer
 
     def perform_create(self, serializer):
-        serializer.save(tenant=self.request.tenant)
+        from django.db import transaction
+        from ingestion.models import FeedbackItem
+
+        with transaction.atomic():
+            correction = serializer.save(tenant=self.request.tenant)
+            FeedbackItem.objects.filter(pk=correction.feedback_item_id).update(
+                **{correction.field_corrected: correction.human_value}
+            )

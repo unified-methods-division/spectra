@@ -234,3 +234,145 @@ class EmbedBatchTests(TestCase):
         # by checking that apply_async was called on the chain
         # (process_source builds and dispatches the chain)
         self.assertTrue(mock_classify.si.called or mock_embed.si.called)
+
+
+class CorrectionApplyTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user(username="test", password="test")
+        self.client.force_login(self.user)
+
+        self.tenant = Tenant.objects.create(name="T")
+        self.other = Tenant.objects.create(name="Other")
+        self.source = Source.objects.create(
+            tenant=self.tenant,
+            name="s",
+            source_type=Source.SourceType.CSV_UPLOAD,
+        )
+        self.item = FeedbackItem.objects.create(
+            tenant=self.tenant,
+            source=self.source,
+            content="x",
+            received_at=timezone.now(),
+            sentiment=FeedbackItem.Sentiment.NEGATIVE,
+            urgency=FeedbackItem.Urgency.MEDIUM,
+            themes=["billing", "refunds"],
+        )
+
+    def _post(self, body, tenant=None):
+        return self.client.post(
+            "/api/analysis/corrections/",
+            data=body,
+            content_type="application/json",
+            HTTP_X_TENANT_ID=str((tenant or self.tenant).id),
+        )
+
+    def test_sentiment_correction_applies_to_feedback_item(self):
+        """Correction updates FeedbackItem.sentiment to human_value"""
+        r = self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "sentiment",
+            "ai_value": "negative",
+            "human_value": "positive",
+        })
+        self.assertEqual(r.status_code, 201)
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.sentiment, "positive")
+        from .models import Correction
+        self.assertEqual(Correction.objects.count(), 1)
+
+    def test_urgency_correction_applies(self):
+        """Correction updates FeedbackItem.urgency to human_value"""
+        r = self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "urgency",
+            "ai_value": "medium",
+            "human_value": "critical",
+        })
+        self.assertEqual(r.status_code, 201)
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.urgency, "critical")
+
+    def test_themes_correction_replaces_list(self):
+        """Correction replaces FeedbackItem.themes with human_value list"""
+        r = self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "themes",
+            "ai_value": ["billing", "refunds"],
+            "human_value": ["billing"],
+        })
+        self.assertEqual(r.status_code, 201)
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.themes, ["billing"])
+
+    def test_cross_tenant_feedback_item_rejected(self):
+        """Cannot create correction for item belonging to a different tenant"""
+        other_src = Source.objects.create(
+            tenant=self.other,
+            name="o",
+            source_type=Source.SourceType.CSV_UPLOAD,
+        )
+        other_item = FeedbackItem.objects.create(
+            tenant=self.other,
+            source=other_src,
+            content="x",
+            received_at=timezone.now(),
+        )
+        r = self._post({
+            "feedback_item": str(other_item.id),
+            "field_corrected": "sentiment",
+            "ai_value": None,
+            "human_value": "positive",
+        })
+        self.assertEqual(r.status_code, 400)
+        other_item.refresh_from_db()
+        self.assertIsNone(other_item.sentiment)
+        from .models import Correction
+        self.assertEqual(Correction.objects.count(), 0)
+
+    def test_invalid_urgency_value_rejected(self):
+        """Cannot correct urgency to an invalid value"""
+        r = self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "urgency",
+            "ai_value": "medium",
+            "human_value": "huge",
+        })
+        self.assertEqual(r.status_code, 400)
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.urgency, "medium")
+
+    def test_invalid_themes_shape_rejected(self):
+        """Cannot correct themes to a non-list value"""
+        r = self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "themes",
+            "ai_value": ["billing"],
+            "human_value": "billing",
+        })
+        self.assertEqual(r.status_code, 400)
+
+    def test_multi_correction_chain_preserves_original_ai_value(self):
+        """Multiple corrections: item reflects latest, earliest ai_value is original AI"""
+        from .models import Correction
+
+        self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "sentiment",
+            "ai_value": "negative",
+            "human_value": "neutral",
+        })
+        self._post({
+            "feedback_item": str(self.item.id),
+            "field_corrected": "sentiment",
+            "ai_value": "neutral",
+            "human_value": "positive",
+        })
+
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.sentiment, "positive")
+        self.assertEqual(Correction.objects.count(), 2)
+
+        earliest = Correction.objects.order_by("created_at").first()
+        self.assertEqual(earliest.ai_value, "negative")

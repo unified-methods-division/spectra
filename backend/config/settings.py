@@ -167,4 +167,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "themes.discover_themes_for_all_tenants",
         "schedule": crontab(hour=3, minute=0),
     },
+    "compute-daily-snapshots": {
+        "task": "trends.compute_daily_snapshots",
+        "schedule": crontab(hour=4, minute=0),
+    },
 }

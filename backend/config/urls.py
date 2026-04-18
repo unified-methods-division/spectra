@@ -22,4 +22,5 @@ urlpatterns = [
     path("api/ingestion/", include("ingestion.urls")),
     path("api/analysis/", include("analysis.urls")),
     path("api/themes/", include("themes.urls")),
+    path("api/trends/", include("trends.urls")),
 ]

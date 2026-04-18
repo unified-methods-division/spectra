@@ -2,12 +2,23 @@ import uuid
 
 from django.db import models
 
+from ingestion.models import FeedbackItem
+
 
 class TrendSnapshot(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("core.Tenant", on_delete=models.CASCADE, related_name="trend_snapshots")
+    tenant = models.ForeignKey(
+        "core.Tenant", on_delete=models.CASCADE, related_name="trend_snapshots"
+    )
     snapshot_date = models.DateField()
-    metrics = models.JSONField()
+    metrics = models.JSONField(
+        {
+            "total_accuracy": float,
+            "accuracy_by_theme": dict[str, float],
+            "accuracy_by_sentiment": dict[FeedbackItem.Sentiment, float],
+            "accuracy_by_urgency": dict[FeedbackItem.Urgency, float],
+        }
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -33,7 +44,9 @@ class Alert(models.Model):
         CRITICAL = "critical", "Critical"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("core.Tenant", on_delete=models.CASCADE, related_name="alerts")
+    tenant = models.ForeignKey(
+        "core.Tenant", on_delete=models.CASCADE, related_name="alerts"
+    )
     alert_type = models.TextField(choices=AlertType.choices)
     severity = models.TextField(choices=Severity.choices)
     title = models.TextField()
