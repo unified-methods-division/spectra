@@ -18,7 +18,7 @@ Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.
 ```
 
 - **One blank line** between subject and body.
-- **Subject:** imperative mood (“add”, not “added”), **lowercase type**, no trailing period, aim **≤72 chars** total line. Say **what changed** (behavior, API, invariant)—not “work was done on X.”
+- **Subject:** imperative mood (“add”, not “added”), **lowercase type**, no trailing period. Prefer **≤~72 chars** for readable one-line logs; repo hook rejects above **120**. Say **what changed** (behavior, API, invariant)—not “work was done on X.”
 - **Scope:** optional noun in parentheses; use a real area of this repo when it helps: `frontend`, `ingestion`, `analysis`, `trends`, `core`, `repo` (tooling/layout), `docs`, `colearn` (only if the commit is mostly curriculum/docs there).
 - **Breaking changes:** `feat(api)!: …` and/or footer `BREAKING CHANGE: …` (uppercase token).
 

@@ -3,7 +3,7 @@
 - Prefer terse, concrete rewrites and explanations over high-level guidance.
 - Prefer direct execution over discussion: make the file change first, keep chat minimal.
 - When editing authored docs or curriculum files, preserve existing content and append new build notes instead of replacing prior text.
-- Prefer commit message rewrites to be tight and free of slop.
+- Commit messages: conventional `type(scope):` subject is fine; keep subject and optional body terse—avoid long, chatty, bot-like changelog bullets. Prefer concrete verbs (add/fix/wire/guard/validate/…); avoid filler like _enhance_, _introduce_, _leverage_, _streamline_—say what actually changed.
 - Prefer output that drives actionable product decisions, not infrastructure-heavy info dumps.
 - Prefer grading that rewards architectural intent, tradeoff reasoning, and flow clarity over exact file-tree recitation unless strict scaffold fidelity is explicitly requested.
 - Prefer minimal repetitive chat; consolidate guidance into updated files to avoid repeated token-heavy explanations.
@@ -11,7 +11,7 @@
 - Apply your own standards to your own output: if you dock the student for something, don't do it in your tightened/ideal version. The student catches inconsistency immediately.
 - When grading hypothetical scenarios (e.g., "explain to a client"), don't dock for referencing future product surfaces — that's natural in a pitch context.
 - Prefers TDD workflow for backend builds ("TDD mindset" — RED/GREEN/REFACTOR cycles).
-- Commit messages should use conventional commit format with scope (e.g., `feat(analysis):`, `refactor(repo):`).
+- Prefers TanStack Query v5 patterns that keep UI lean: e.g. drive invalidation from the query path (`queryFn` after a terminal successful read) instead of extra React `useEffect` wired to query data when avoiding effect churn.
 
 ## Runtime Requirements
 
@@ -32,7 +32,8 @@
 - Backend Postgres is Neon-first via `DATABASE_URL` and `dj-database-url`; local Docker Compose usually runs Redis (and the app) without a bundled Postgres container.
 - Neon-style `DATABASE_URL` examples should include `sslmode=require` and `channel_binding=require` in the query string when the stack expects them.
 - M1 is complete (Steps 1.1-1.5). Deferred items: Source.config overloaded, no mid-task progress, serializer leaks config, temp file local-only, no Postgres RLS.
-- M2.5 built: tenant-wide theme discovery (`themes/discovery.py`: sklearn HDBSCAN + LLM summarize + cosine merge; writes `Theme.slug` onto `FeedbackItem.themes` for `?theme=` filtering); `process_source` chains classify → embed → `discover_themes_for_source`; `GET/POST api/themes/` + Themes UI; Explorer theme filter + URL-driven filters; `python manage.py reset_app_data` keeps tenants only. 35 backend tests total.
+- M2.5 built: tenant-wide theme discovery (`themes/discovery.py`: sklearn HDBSCAN + LLM summarize + cosine merge; writes `Theme.slug` onto `FeedbackItem.themes` for `?theme=` filtering); `process_source` chains classify → embed → `discover_themes_for_source`; `GET/POST api/themes/` + Themes UI; Explorer theme filter + URL-driven filters; `python manage.py reset_app_data` keeps tenants only. Theme list live `item_count` aligns to explorer by scanning `FeedbackItem.themes` per slug (not a `themes__contains=[OuterRef]` subquery—SQLite limits + psycopg3 JSON bind issues on Postgres). 35 backend tests total.
+- M3.1 built: Correction apply (`POST /api/analysis/corrections/` writes `human_value` to `FeedbackItem` atomically via `transaction.atomic()` + `.update()`); shape validation per `field_corrected`; `trends/engine.py` rewritten to read AI originals from `Correction.ai_value` for corrected fields (earliest correction = true AI prediction); `trends/tasks.py` with `compute_daily_snapshots()` beat task (runs 4am daily); `GET /api/trends/snapshots/?start=&end=` API endpoint with tenant-scoped date filtering. 49 backend tests total.
 - `scikit-learn>=1.6.0` is a backend dependency (provides `sklearn.cluster.HDBSCAN` for theme clustering).
 - Git repo was moved from `backend/` (where `uv init` created it) to the project root `feedback-intelligence/`.
 

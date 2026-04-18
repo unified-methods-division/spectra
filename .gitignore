@@ -17,7 +17,12 @@ colearn/
 .env.*
 !.env.example
 
-# Editor/tool state
-.cursor/
+# Editor/tool state — Cursor: ignore everything under .cursor except rules/ (shared .mdc)
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
 .claude/
 memory/
+
+# Celery Beat (local scheduler state; do not commit)
+celerybeat-schedule*

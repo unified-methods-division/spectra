@@ -19,6 +19,16 @@ Open-source tool for turning user feedback from multiple channels into prioritiz
 - Redis
 - A PostgreSQL database (we use [Neon](https://neon.tech/))
 
+### Git hooks (Conventional Commits)
+
+Once per clone, point Git at this repo’s hooks (validates subject line + a small banned-word list; see [`.githooks/commit-msg`](.githooks/commit-msg) and [`.cursor/rules/conventional-commits.mdc`](.cursor/rules/conventional-commits.mdc)):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+To skip checks intentionally (e.g. emergency hotfix): `git commit --no-verify`.
+
 ### Backend
 
 ```bash
@@ -63,6 +73,74 @@ uv run celery -A config worker -l info
 
 Required for file uploads, classification, and embedding tasks to actually run.
 
+### Celery Beat
+
+```bash
+cd backend
+uv run celery -A config beat -l info
+```
+
+Required for scheduled background jobs in `CELERY_BEAT_SCHEDULE` to enqueue automatically.
+Current scheduled jobs:
+
+- `themes.discover_themes_for_all_tenants` at `03:00`
+- `trends.compute_daily_snapshots` at `04:00`
+
+You do not need to keep your machine running until 3 or 4 AM to test these locally. Beat is for production-like scheduling; in development, trigger the tasks manually.
+
+### Manually trigger scheduled tasks
+
+Run them directly from Django shell:
+
+```bash
+cd backend
+uv run python manage.py shell -c "from themes.tasks import discover_themes_for_all_tenants; discover_themes_for_all_tenants()"
+uv run python manage.py shell -c "from trends.tasks import compute_daily_snapshots; compute_daily_snapshots()"
+```
+
+Or enqueue them through Celery to exercise Redis + worker too:
+
+```bash
+cd backend
+uv run python manage.py shell -c "from themes.tasks import discover_themes_for_all_tenants; discover_themes_for_all_tenants.delay()"
+uv run python manage.py shell -c "from trends.tasks import compute_daily_snapshots; compute_daily_snapshots.delay()"
+```
+
+### Run the full dev stack with tmuxp
+
+If you want the whole app up in one shot without a homemade launcher, this repo includes a checked-in `.tmuxp.yaml` workspace.
+
+Prereqs:
+
+- `tmux`
+- `tmuxp`
+
+Example install:
+
+```bash
+# Ubuntu/WSL
+sudo apt install -y tmux
+
+# install tmuxp once
+uv tool install tmuxp
+```
+
+Then from the project root:
+
+```bash
+tmuxp load ./
+```
+
+That opens separate tmux windows for:
+
+- Redis status check
+- Django backend
+- Celery worker
+- Celery beat
+- Vite frontend
+
+The Redis window only checks whether Redis is already running on `localhost:6379`; it does not start Redis for you. If Redis is down, start it with the commands above and reload the workspace.
+
 ### Frontend
 
 ```bash
@@ -77,7 +155,7 @@ bun dev
 
 ### First run
 
-1. Start Redis, backend, Celery worker, and frontend
+1. Start Redis, backend, Celery worker, and frontend (`celery beat` too if you want scheduled jobs running automatically), or just run `tmuxp load ./`
 2. Log in at http://localhost:8000/admin/ (creates session cookie)
 3. Open http://localhost:5173/sources
 4. Add a source, upload a CSV, watch it process
