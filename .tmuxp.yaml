@@ -1,0 +1,31 @@
+session_name: feedback-intelligence
+start_directory: ./
+windows:
+  - window_name: redis
+    panes:
+      - shell_command:
+          - >-
+            bash -lc 'if redis-cli ping >/dev/null 2>&1; then
+            echo "Redis is running on localhost:6379";
+            else
+            echo "Redis is not running on localhost:6379";
+            echo "Start it first, then reload this workspace.";
+            fi;
+            exec bash'
+  - window_name: backend
+    start_directory: ./backend
+    focus: true
+    panes:
+      - uv run python manage.py runserver
+  - window_name: worker
+    start_directory: ./backend
+    panes:
+      - uv run celery -A config worker -l info
+  - window_name: beat
+    start_directory: ./backend
+    panes:
+      - uv run celery -A config beat -l info
+  - window_name: frontend
+    start_directory: ./frontend
+    panes:
+      - bun dev
