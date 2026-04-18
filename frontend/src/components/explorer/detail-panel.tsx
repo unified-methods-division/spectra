@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon, PencilEdit01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
 import { useSubmitCorrection } from "@/hooks/use-explorer"
+import { themeFilterChipLabels } from "@/lib/theme-filter-chip"
 import type { FeedbackItem, Sentiment, Urgency } from "@/types/api"
 
 type DetailPanelProps = {
@@ -12,6 +13,8 @@ type DetailPanelProps = {
   onClose: () => void
   /** Slug matches `?theme=`; only used from Explorer */
   onFilterByTheme?: (themeSlug: string) => void
+  themeNameBySlug?: Record<string, string>
+  activeThemeSlug?: string | null
 }
 
 const SENTIMENT_OPTIONS: { value: Sentiment; label: string; className: string }[] = [
@@ -184,11 +187,15 @@ function CorrectableThemes({
   itemId,
   onCorrected,
   onFilterByTheme,
+  themeNameBySlug,
+  activeThemeSlug,
 }: {
   themes: string[]
   itemId: string
   onCorrected: () => void
   onFilterByTheme?: (themeSlug: string) => void
+  themeNameBySlug?: Record<string, string>
+  activeThemeSlug?: string | null
 }) {
   const [editing, setEditing] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
@@ -217,19 +224,31 @@ function CorrectableThemes({
         Themes
       </span>
       <div className="flex flex-wrap gap-1 justify-end items-center max-w-[65%]">
-        {themes.map((theme) =>
+        <div
+          className="flex flex-wrap gap-1 justify-end items-center"
+          role={!editing && onFilterByTheme ? "group" : undefined}
+          aria-label={
+            !editing && onFilterByTheme
+              ? "Theme filters for this item. Each button applies the feedback list theme filter."
+              : undefined
+          }
+        >
+          {themes.map((theme) =>
           !editing && onFilterByTheme ? (
             <button
               key={theme}
               type="button"
               onClick={() => onFilterByTheme(theme)}
               className={cn(
-                "inline-flex min-h-6 touch-manipulation items-center gap-1 rounded bg-foreground/8 px-1.5 py-0.5 text-xs font-mono text-muted-foreground transition-colors",
+                "inline-flex min-h-6 min-w-6 touch-manipulation items-center gap-1 rounded bg-foreground/8 px-1.5 py-0.5 text-xs font-mono text-muted-foreground transition-colors [-webkit-tap-highlight-color:transparent]",
                 "cursor-pointer hover:bg-foreground/15 hover:text-foreground",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 removing === theme && "opacity-50",
+                activeThemeSlug === theme &&
+                  "bg-primary/15 text-foreground ring-1 ring-primary/30",
               )}
-              aria-label={`Filter by theme ${theme}`}
+              {...themeFilterChipLabels(theme, themeNameBySlug?.[theme])}
+              aria-current={activeThemeSlug === theme ? true : undefined}
             >
               {theme}
             </button>
@@ -254,6 +273,7 @@ function CorrectableThemes({
             </span>
           ),
         )}
+        </div>
         {corrected && (
           <motion.span
             initial={{ opacity: 1, scale: 0.8 }}
@@ -286,7 +306,13 @@ function CorrectableThemes({
 
 /* ─── Main panel ─── */
 
-export function DetailPanel({ item, onClose, onFilterByTheme }: DetailPanelProps) {
+export function DetailPanel({
+  item,
+  onClose,
+  onFilterByTheme,
+  themeNameBySlug,
+  activeThemeSlug,
+}: DetailPanelProps) {
   const [toastVisible, setToastVisible] = useState(false)
 
   const showToast = () => {
@@ -408,6 +434,8 @@ export function DetailPanel({ item, onClose, onFilterByTheme }: DetailPanelProps
                     itemId={item.id}
                     onCorrected={showToast}
                     onFilterByTheme={onFilterByTheme}
+                    themeNameBySlug={themeNameBySlug}
+                    activeThemeSlug={activeThemeSlug}
                   />
                 </>
               )}

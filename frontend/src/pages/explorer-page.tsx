@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { useSearchParams } from "react-router"
 import { useFeedbackItems, type ExplorerFilters } from "@/hooks/use-explorer"
@@ -36,6 +36,11 @@ export function ExplorerPage() {
   const { data, isLoading, error } = useFeedbackItems(filters)
   const { data: sources } = useSources()
   const { data: themes = [] } = useThemes()
+
+  const themeNameBySlug = useMemo(
+    () => Object.fromEntries(themes.map((t) => [t.slug, t.name])),
+    [themes],
+  )
 
   const onFilterChange = (next: ExplorerFilters) => {
     setSearchParams(
@@ -157,6 +162,8 @@ export function ExplorerPage() {
                   setSelectedItem(null)
                   onFilterChange({ ...filters, theme: slug, page: 1 })
                 }}
+                themeNameBySlug={themeNameBySlug}
+                activeThemeSlug={filters.theme}
               />
             ))}
           </div>
@@ -219,6 +226,8 @@ export function ExplorerPage() {
               setSelectedItem(null)
               onFilterChange({ ...filters, theme: slug, page: 1 })
             }}
+            themeNameBySlug={themeNameBySlug}
+            activeThemeSlug={filters.theme}
           />
         )}
       </AnimatePresence>

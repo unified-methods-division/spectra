@@ -1,4 +1,5 @@
 import { cn, formatRelativeTime } from "@/lib/utils"
+import { themeFilterChipLabels } from "@/lib/theme-filter-chip"
 import { motion } from "motion/react"
 import type { FeedbackItem } from "@/types/api"
 import type { KeyboardEvent } from "react"
@@ -10,6 +11,10 @@ type FeedbackRowProps = {
   onClick: () => void
   /** Theme values are slugs; updates explorer `?theme=` when set */
   onThemeClick?: (themeSlug: string) => void
+  /** When set, richer `aria-label` / `title` use Theme.name for each slug */
+  themeNameBySlug?: Record<string, string>
+  /** Current `?theme=` filter; chip gets `aria-current` when it matches */
+  activeThemeSlug?: string | null
 }
 
 const SENTIMENT_STYLES: Record<string, { text: string; bg: string }> = {
@@ -25,6 +30,8 @@ export function FeedbackRow({
   isSelected,
   onClick,
   onThemeClick,
+  themeNameBySlug,
+  activeThemeSlug,
 }: FeedbackRowProps) {
   const sentiment = item.sentiment ? SENTIMENT_STYLES[item.sentiment] : null
 
@@ -81,7 +88,11 @@ export function FeedbackRow({
         {/* Theme tags */}
         {item.themes && item.themes.length > 0 && (
           <>
-            <span className="flex items-center gap-1">
+            <span
+              className="flex items-center gap-1"
+              role="group"
+              aria-label="Themes on this feedback. Each button filters the list."
+            >
               {item.themes.slice(0, 3).map((theme) =>
                 onThemeClick ? (
                   <button
@@ -92,12 +103,15 @@ export function FeedbackRow({
                       onThemeClick(theme)
                     }}
                     className={cn(
-                      "min-h-6 touch-manipulation rounded px-1.5 py-px text-left text-xs font-mono text-muted-foreground",
-                      "bg-foreground/8 transition-colors cursor-pointer",
+                      "min-h-6 min-w-6 touch-manipulation rounded px-1.5 py-px text-left text-xs font-mono text-muted-foreground",
+                      "bg-foreground/8 transition-colors cursor-pointer [-webkit-tap-highlight-color:transparent]",
                       "hover:bg-foreground/15 hover:text-foreground",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      activeThemeSlug === theme &&
+                        "bg-primary/15 text-foreground ring-1 ring-primary/30",
                     )}
-                    aria-label={`Filter by theme ${theme}`}
+                    {...themeFilterChipLabels(theme, themeNameBySlug?.[theme])}
+                    aria-current={activeThemeSlug === theme ? true : undefined}
                   >
                     {theme}
                   </button>
@@ -111,7 +125,10 @@ export function FeedbackRow({
                 ),
               )}
               {item.themes.length > 3 && (
-                <span className="text-xs text-muted-foreground/50">
+                <span
+                  className="text-xs text-muted-foreground/50"
+                  title={`${item.themes.length - 3} more theme${item.themes.length - 3 === 1 ? "" : "s"} on this item — open the row for the full list.`}
+                >
                   +{item.themes.length - 3}
                 </span>
               )}
