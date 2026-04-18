@@ -19,7 +19,7 @@ def _feedback_theme_slug_counts(*, tenant_id):
         .exclude(themes__isnull=True)
         .values_list("themes", flat=True)
     )
-    for theme_list in qs.iterator(chunk_size=2000):
+    for theme_list in qs:
         if not theme_list:
             continue
         for slug in set(theme_list):
