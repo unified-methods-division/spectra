@@ -1,0 +1,54 @@
+#!/bin/sh
+# Validates Conventional Commits subject line + banned filler words.
+# Docs: .cursor/rules/conventional-commits.mdc
+#
+# Subject length: hard cap below (Git log / GitHub one-line); prefer ~72 when you can.
+
+set -e
+
+MAX_SUBJECT_LEN=120
+
+msg_file=${1:-}
+if [ -z "$msg_file" ] || [ ! -r "$msg_file" ]; then
+  echo "commit-msg: missing or unreadable message file" >&2
+  exit 1
+fi
+
+# First non-empty, non-comment line = subject (Git template lines start with #)
+subject=$(grep -v '^[[:space:]]*#' "$msg_file" | awk 'NF {print; exit}')
+
+if [ -z "$subject" ]; then
+  echo "commit-msg: empty commit message" >&2
+  exit 1
+fi
+
+# Let Git / rebase machinery through
+case $subject in
+  Merge\ *|Revert\ *) exit 0 ;;
+  fixup\!*|squash\!*) exit 0 ;;
+esac
+
+if ! printf '%s\n' "$subject" | grep -qE '^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\([a-z0-9._/-]+\))?(!)?: .+'; then
+  echo "commit-msg: subject must match: type(scope): summary  (scope optional)" >&2
+  echo "commit-msg: allowed types: feat fix chore docs style refactor perf test build ci revert" >&2
+  echo "commit-msg: got: $subject" >&2
+  exit 1
+fi
+
+len=$(printf '%s' "$subject" | wc -c | awk '{print $1}')
+if [ "$len" -gt "$MAX_SUBJECT_LEN" ]; then
+  echo "commit-msg: subject is ${len} chars (max ${MAX_SUBJECT_LEN})" >&2
+  echo "commit-msg: $subject" >&2
+  exit 1
+fi
+
+# Subject + body: no filler verbs (case-insensitive whole words)
+content=$(grep -v '^[[:space:]]*#' "$msg_file")
+if printf '%s\n' "$content" | grep -qiE \
+  '\<(implement|enhance|introduce|leverage|streamline|facilitate|empower|utilize|holistic|seamless|robust|comprehensive|various|delve|optimize)\>'; then
+  echo "commit-msg: drop filler words (implement, enhance, introduce, …); say what changed." >&2
+  echo "commit-msg: see .cursor/rules/conventional-commits.mdc" >&2
+  exit 1
+fi
+
+exit 0
