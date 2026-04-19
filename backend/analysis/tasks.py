@@ -2,15 +2,16 @@ import logging
 from typing import Any
 
 from celery import chain, shared_task
-from themes.tasks import discover_themes_for_source
+from core.models import Tenant
 from django.db import transaction
 from django.utils import timezone
-
 from ingestion.models import FeedbackItem, RoutingConfig, Source
 from themes.models import Theme
+from themes.tasks import discover_themes_for_source
 
 from .classifier import classify_item
 from .embedder import embed_texts
+from .improvement import assess_corrections
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +54,9 @@ def classify_feedback_batch(
 
     # Pick up unprocessed items (partial index: idx_feedback_unprocessed)
     items = list(
-        FeedbackItem.objects.filter(
-            source_id=source_id, processed_at__isnull=True
-        )[:batch_size]
+        FeedbackItem.objects.filter(source_id=source_id, processed_at__isnull=True)[
+            :batch_size
+        ]
     )
 
     classified_items = []
@@ -160,9 +161,7 @@ EMBED_CHUNK_SIZE = 100
 
 
 @shared_task(bind=True, name="analysis.embed_feedback_batch")
-def embed_feedback_batch(
-    self, source_id: str, batch_size: int = 500
-) -> dict[str, Any]:
+def embed_feedback_batch(self, source_id: str, batch_size: int = 500) -> dict[str, Any]:
     source = Source.objects.select_related("tenant").get(id=source_id)
     source.config = _next_config_state(
         source.config,
@@ -247,3 +246,9 @@ def process_source(source_id: str) -> None:
         discover_themes_for_source.si(source_id),
     )
     pipeline.apply_async()
+
+
+@shared_task(name="analysis.assess_corrections")
+def assess_corrections_for_all_tenants() -> None:
+    for tenant in Tenant.objects.all():
+        assess_corrections(str(tenant.id), end_date=timezone.now().date())

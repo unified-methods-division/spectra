@@ -105,15 +105,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 LANGUAGE_CODE = "en-us"
@@ -170,5 +164,9 @@ CELERY_BEAT_SCHEDULE = {
     "compute-daily-snapshots": {
         "task": "trends.compute_daily_snapshots",
         "schedule": crontab(hour=4, minute=0),
+    },
+    "assess-corrections-daily": {
+        "task": "analysis.assess_corrections",
+        "schedule": crontab(hour=5, minute=0),
     },
 }
