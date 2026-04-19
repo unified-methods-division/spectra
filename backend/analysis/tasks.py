@@ -12,6 +12,7 @@ from themes.tasks import discover_themes_for_source
 from .classifier import classify_item
 from .embedder import embed_texts
 from .improvement import assess_corrections
+from .normalizer import normalize_themes
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,8 @@ def classify_feedback_batch(
     for item in items:
         try:
             analysis = classify_item(item.content, theme_slugs)
+            # Normalize AI themes to existing slugs via embedding similarity
+            analysis.themes = normalize_themes(analysis.themes, theme_slugs)
         except Exception:
             logger.exception("Classification failed for item %s", item.id)
             failed_count += 1

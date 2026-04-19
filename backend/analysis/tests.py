@@ -376,3 +376,61 @@ class CorrectionApplyTests(TestCase):
 
         earliest = Correction.objects.order_by("created_at").first()
         self.assertEqual(earliest.ai_value, "negative")
+
+
+class NormalizerTests(TestCase):
+    @patch("analysis.normalizer.embed_texts")
+    def test_snaps_to_existing_when_similar(self, mock_embed):
+        """billing-issue snaps to billing when cosine similarity >= 0.85"""
+        from .normalizer import normalize_themes
+
+        # billing-issue embedding is close to billing embedding
+        mock_embed.side_effect = [
+            [[0.9, 0.1]],  # billing-issue
+            [[0.95, 0.05], [0.1, 0.9]],  # billing, onboarding
+        ]
+        result = normalize_themes(["billing-issue"], ["billing", "onboarding"])
+        self.assertEqual(result, ["billing"])
+
+    @patch("analysis.normalizer.embed_texts")
+    def test_keeps_new_when_not_similar(self, mock_embed):
+        """pricing stays as-is when no existing theme is similar"""
+        from .normalizer import normalize_themes
+
+        # pricing embedding is orthogonal to existing themes
+        mock_embed.side_effect = [
+            [[0.1, 0.9]],  # pricing
+            [[0.95, 0.05], [0.8, 0.2]],  # billing, export
+        ]
+        result = normalize_themes(["pricing"], ["billing", "export"])
+        self.assertEqual(result, ["pricing"])
+
+    @patch("analysis.normalizer.embed_texts")
+    def test_normalizes_multiple_themes(self, mock_embed):
+        """Multiple AI themes are each normalized independently"""
+        from .normalizer import normalize_themes
+
+        mock_embed.side_effect = [
+            [[0.9, 0.1], [0.1, 0.9]],  # billing-issue, new-topic
+            [[0.95, 0.05], [0.05, 0.95]],  # billing, onboarding
+        ]
+        result = normalize_themes(
+            ["billing-issue", "new-topic"],
+            ["billing", "onboarding"],
+        )
+        # billing-issue → billing (similar), new-topic → onboarding (similar)
+        self.assertEqual(result, ["billing", "onboarding"])
+
+    def test_empty_existing_returns_ai_themes(self):
+        """No existing themes → AI themes pass through unchanged"""
+        from .normalizer import normalize_themes
+
+        result = normalize_themes(["billing", "export"], [])
+        self.assertEqual(result, ["billing", "export"])
+
+    def test_empty_ai_themes_returns_empty(self):
+        """No AI themes → empty list returned"""
+        from .normalizer import normalize_themes
+
+        result = normalize_themes([], ["billing", "export"])
+        self.assertEqual(result, [])

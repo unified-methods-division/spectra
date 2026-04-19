@@ -28,8 +28,14 @@ _summarizer: Agent[None, ThemeSummary] = Agent(
     output_type=ThemeSummary,
     instructions=(
         "You are given representative feedback items from a cluster. "
-        "Determine a concise theme name, a lowercase-hyphenated slug (2-4 words), "
-        "and a one-sentence description of what this cluster is about."
+        "Return:\n"
+        "- name: single-word or two-word topic (billing, onboarding, csv-export)\n"
+        "- slug: lowercase-hyphenated version of name\n"
+        "- description: one-liner, no filler words, what this topic covers\n\n"
+        "Example descriptions:\n"
+        "- 'Payment processing and subscription charges'\n"
+        "- 'First-time user setup and account creation'\n"
+        "- 'Data export and download functionality'"
     ),
 )
 
