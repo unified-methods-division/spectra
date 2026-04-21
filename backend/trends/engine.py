@@ -1,12 +1,54 @@
 import logging
 from collections import defaultdict
 from datetime import date
+from typing import TYPE_CHECKING
 
 from analysis.models import Correction
 from ingestion.models import FeedbackItem
 from trends.models import TrendSnapshot
 
+if TYPE_CHECKING:
+    from analysis.models import PromptVersion
+
 logger = logging.getLogger(__name__)
+
+
+def measure_accuracy(
+    tenant_id: str,
+    snapshot_date: date,
+    new_prompt_version: "PromptVersion",
+    corrections: list,
+) -> float:
+    """
+    Measure accuracy for a prompt version based on corrections.
+    
+    This is a simplified accuracy measurement that calculates how well
+    the prompt version would perform based on the correction patterns.
+    
+    Returns accuracy as a float between 0 and 1.
+    """
+    if not corrections:
+        return 0.0
+    
+    total_samples = 0
+    correct_predictions = 0
+    
+    for correction_group in corrections:
+        for correction in correction_group:
+            total_samples += 1
+            # In a real implementation, we would re-run the classifier
+            # with the new prompt and compare results.
+            # For now, we estimate based on the correction pattern coverage.
+            if new_prompt_version.few_shot_examples:
+                for example in new_prompt_version.few_shot_examples:
+                    if (
+                        example.get("field") == correction.field_corrected
+                        and example.get("target") == correction.human_value
+                    ):
+                        correct_predictions += 1
+                        break
+    
+    return round(correct_predictions / total_samples, 4) if total_samples > 0 else 0.0
 
 
 def compute_daily_accuracy(tenant_id: str, snapshot_date: date) -> TrendSnapshot:

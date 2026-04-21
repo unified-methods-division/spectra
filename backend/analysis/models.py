@@ -15,7 +15,9 @@ class Correction(models.Model):
         on_delete=models.CASCADE,
         related_name="corrections",
     )
-    tenant = models.ForeignKey("core.Tenant", on_delete=models.CASCADE, related_name="corrections")
+    tenant = models.ForeignKey(
+        "core.Tenant", on_delete=models.CASCADE, related_name="corrections"
+    )
     field_corrected = models.TextField(choices=CorrectedField.choices)
     ai_value = models.JSONField()
     human_value = models.JSONField()
@@ -23,7 +25,9 @@ class Correction(models.Model):
 
     class Meta:
         db_table = "corrections"
-        indexes = [models.Index(fields=["tenant", "created_at"], name="idx_corrections_tenant")]
+        indexes = [
+            models.Index(fields=["tenant", "created_at"], name="idx_corrections_tenant")
+        ]
 
 
 class PromptVersion(models.Model):
@@ -99,6 +103,7 @@ class RecommendationEvidence(models.Model):
         related_name="recommendation_evidence",
     )
     evidence_weight = models.FloatField(default=1.0)
+    selection_reason = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

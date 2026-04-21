@@ -31,11 +31,14 @@
 - Grading results and build notes are expected to be written in the current milestone workbook file, not only in chat.
 - Backend Postgres is Neon-first via `DATABASE_URL` and `dj-database-url`; local Docker Compose usually runs Redis (and the app) without a bundled Postgres container.
 - Neon-style `DATABASE_URL` examples should include `sslmode=require` and `channel_binding=require` in the query string when the stack expects them.
-- M1 is complete (Steps 1.1-1.5). Deferred items: Source.config overloaded, no mid-task progress, serializer leaks config, temp file local-only, no Postgres RLS.
+- M1 is complete (Steps 1.1-1.5). Deferred items: Source.config overloaded, no mid-task progress, serializer leaks config, temp file local-only, no Postgres RLS, no upload traceability (`UploadBatch` model — see `scope.md`).
 - M2.5 built: tenant-wide theme discovery (`themes/discovery.py`: sklearn HDBSCAN + LLM summarize + cosine merge; writes `Theme.slug` onto `FeedbackItem.themes` for `?theme=` filtering); `process_source` chains classify → embed → `discover_themes_for_source`; `GET/POST api/themes/` + Themes UI; Explorer theme filter + URL-driven filters; `python manage.py reset_app_data` keeps tenants only. Theme list live `item_count` aligns to explorer by scanning `FeedbackItem.themes` per slug (not a `themes__contains=[OuterRef]` subquery—SQLite limits + psycopg3 JSON bind issues on Postgres). 35 backend tests total.
 - M3.1 built: Correction apply (`POST /api/analysis/corrections/` writes `human_value` to `FeedbackItem` atomically via `transaction.atomic()` + `.update()`); shape validation per `field_corrected`; `trends/engine.py` rewritten to read AI originals from `Correction.ai_value` for corrected fields (earliest correction = true AI prediction); `trends/tasks.py` with `compute_daily_snapshots()` beat task (runs 4am daily); `GET /api/trends/snapshots/?start=&end=` API endpoint with tenant-scoped date filtering. 49 backend tests total.
+- M3 curriculum restructured: 3.1 accuracy -> 3.2 improvement loop -> 3.3 Weekly Outlook foundation + shared synthesis model -> 3.4 decision workflow + alerts + drilldown -> 3.5 eval harness. Old steps 3.5/3.6/3.7 merged or moved to optional extension.
+- Harness framework for complex features lives at `../personal/future-chat/harness-canon/agentic-harness-invariants-tdd.md` — use for invariant-scoped TDD when building multi-surface features.
 - `scikit-learn>=1.6.0` is a backend dependency (provides `sklearn.cluster.HDBSCAN` for theme clustering).
 - Git repo was moved from `backend/` (where `uv init` created it) to the project root `feedback-intelligence/`.
+- `frontend/` uses Bun (not pnpm): add packages with the Bun CLI instead of hand-editing `package.json` dependency entries; keep Tailwind usage aligned with Tailwind CSS v4 syntax in components.
 
 ## Build Notes Format (Persistent)
 

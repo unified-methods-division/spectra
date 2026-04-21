@@ -23,6 +23,7 @@ colearn/
 !.cursor/rules/**
 .claude/
 memory/
+thoughts/
 
 # Celery Beat (local scheduler state; do not commit)
 celerybeat-schedule*

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
-RUNNING_TESTS = "test" in sys.argv
+RUNNING_TESTS = "test" in sys.argv or "pytest" in sys.modules
 USE_SQLITE_FOR_TESTS = os.environ.get("DJANGO_TEST_USE_SQLITE", "1") == "1"
 
 SECRET_KEY = os.environ.get(
@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "analysis",
     "themes",
     "trends",
+    "reports",
 ]
 
 MIDDLEWARE = [
@@ -80,6 +81,7 @@ if RUNNING_TESTS and USE_SQLITE_FOR_TESTS:
         "analysis": None,
         "themes": None,
         "trends": None,
+        "reports": None,
     }
 elif DATABASE_URL:
     DATABASES = {
@@ -153,6 +155,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ALWAYS_EAGER = RUNNING_TESTS
 
 from celery.schedules import crontab  # noqa: E402
 
