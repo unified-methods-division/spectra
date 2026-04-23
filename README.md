@@ -2,6 +2,8 @@
 
 Turn user feedback into product decisions. Ingest from CSV/JSONL or webhooks, classify with AI (sentiment, themes, urgency), embed for semantic search, and surface trends and recommendations.
 
+![Spectra masthead](spectra-mast.png)
+
 ## Stack
 
 - **Backend:** Django 6, DRF, Celery, pydantic_ai
