@@ -458,14 +458,14 @@ class Command(BaseCommand):
         snap_count = _seed_snapshots(str(tenant.id), days=14)
         self.stdout.write(self.style.SUCCESS(f"Created {snap_count} trend snapshots"))
 
-        self.stdout.write(self.style.SUCCESS("Seeding report + alerts..."))
-        report, alert_count = _seed_report_and_alerts(tenant, period_start, period_end, async_mode=options["async_mode"])
-        self.stdout.write(self.style.SUCCESS(f"Report {report.id}: {alert_count} alerts"))
-
         items_qs = FeedbackItem.objects.filter(tenant=tenant).order_by("-received_at")
         self.stdout.write(self.style.SUCCESS("Seeding recommendations..."))
         recs = _seed_recommendations(tenant, items_qs, period_start, period_end)
         self.stdout.write(self.style.SUCCESS(f"Created {len(recs)} recommendations"))
+
+        self.stdout.write(self.style.SUCCESS("Seeding report + alerts..."))
+        report, alert_count = _seed_report_and_alerts(tenant, period_start, period_end, async_mode=options["async_mode"])
+        self.stdout.write(self.style.SUCCESS(f"Report {report.id}: {alert_count} alerts"))
 
         self.stdout.write(self.style.SUCCESS("Seeding outcomes..."))
         outcome_count = _seed_outcomes(tenant, recs)
