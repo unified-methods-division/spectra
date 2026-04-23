@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router"
+import { createBrowserRouter } from "react-router"
 import App from "./App"
 import { SourcesPage } from "./pages/sources-page"
 import { ExplorerPage } from "./pages/explorer-page"
@@ -9,6 +9,7 @@ import { DashboardPage } from "./pages/dashboard-page"
 import { EvalPage } from "./pages/eval-page"
 import { RecommendationDetailPage } from "./pages/recommendation-detail-page"
 import { ErrorBoundary, NotFound } from "./components/error-boundary"
+import { SmartRedirect } from "./components/smart-redirect"
 
 export const router = createBrowserRouter([
   {
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
     element: <App />,
     errorElement: <ErrorBoundary />,
     children: [
-      { index: true, element: <Navigate to="/explorer" replace /> },
+      { index: true, element: <SmartRedirect /> },
       { path: "explorer", element: <ExplorerPage /> },
       { path: "sources", element: <SourcesPage /> },
       { path: "dashboard", element: <DashboardPage /> },
