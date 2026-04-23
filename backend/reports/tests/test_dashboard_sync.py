@@ -87,6 +87,8 @@ class TestDashboardSync:
         data = response.json()
         assert data["source"] == "live"
         assert data["report_id"] is None
+        assert "top_recommendations" in data
+        assert isinstance(data["top_recommendations"], list)
 
     @pytest.mark.django_db
     def test_dashboard_uses_cached_report_data(self, tenant, api_client):

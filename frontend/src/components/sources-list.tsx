@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import type { UseQueryResult } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,11 @@ import type { Source } from "@/types/api"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CloudUploadIcon, WebhookIcon, RssIcon, ApiIcon } from "@hugeicons/core-free-icons"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import type { RoutingConfig } from "@/lib/api/routing-config"
+import {
+  useRoutingConfigsForSourceIds,
+  useUpdateRoutingConfig,
+} from "@/lib/api/routing-config"
 
 type Props = {
   sources: Source[]
@@ -55,11 +61,12 @@ function SourceAction({
             )}
             onClick={hasAction ? onUpload : undefined}
             tabIndex={isUploading || !hasAction ? -1 : 0}
-          />
+            aria-label={tooltipLabel}
+          >
+            <HugeiconsIcon icon={config.icon} strokeWidth={1.5} />
+          </Button>
         }
-      >
-        <HugeiconsIcon icon={config.icon} strokeWidth={1.5} />
-      </TooltipTrigger>
+      />
       <TooltipContent side="left">{tooltipLabel}</TooltipContent>
     </Tooltip>
   )
@@ -70,19 +77,27 @@ function SourceRow({
   isUploading,
   onUpload,
   onCloseUpload,
+  routing,
+  updateRouting,
 }: {
   source: Source
   isUploading: boolean
   onUpload: () => void
   onCloseUpload: () => void
+  routing: UseQueryResult<RoutingConfig, Error>
+  updateRouting: ReturnType<typeof useUpdateRoutingConfig>
 }) {
   const counts = (source.config?.ingestion_counts ?? {}) as Record<string, number>
   const itemCount = counts.created ?? 0
   const [uploadPanelStep, setUploadPanelStep] = useState<UploadPanelStep>("select")
+  const [showConfidence, setShowConfidence] = useState(false)
+  const [localThreshold, setLocalThreshold] = useState<number | null>(null)
 
-  useEffect(() => {
-    if (isUploading) setUploadPanelStep("select")
-  }, [isUploading])
+  const displayThreshold = localThreshold ?? routing.data?.confidence_threshold ?? 0.85
+  const saveErrorForRow =
+    updateRouting.isError && updateRouting.variables?.sourceId === source.id
+  const savePendingForRow =
+    updateRouting.isPending && updateRouting.variables?.sourceId === source.id
 
   const showImportProgressSubtitle =
     isUploading && (uploadPanelStep === "uploading" || uploadPanelStep === "tracking")
@@ -121,6 +136,18 @@ function SourceRow({
 
         <div className="flex items-center gap-3 shrink-0">
           {!isUploading && <ProcessingStatusBadge source={source} />}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowConfidence((v) => !v)}
+            className={cn(
+              "h-8 px-2 text-xs",
+              "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+              showConfidence && "opacity-100",
+            )}
+          >
+            Confidence
+          </Button>
           <SourceAction
             source={source}
             isUploading={isUploading}
@@ -129,6 +156,78 @@ function SourceRow({
           />
         </div>
       </div>
+
+      <AnimatePresence>
+        {showConfidence && !isUploading && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4">
+              <div className="rounded-xl border border-foreground/5 bg-background/50 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-medium tracking-[0.15em] text-muted-foreground/60 uppercase">
+                      Confidence threshold
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground text-pretty">
+                      Items with sentiment confidence below this value are flagged for review.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono text-sm tabular-nums">
+                      {routing.data
+                        ? `${Math.round(displayThreshold * 100)}%`
+                        : "—"}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground/70 font-mono tabular-nums">
+                      {routing.data ? `${routing.data.flagged_preview_count} flagged` : "…"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={displayThreshold}
+                    onChange={(e) =>
+                      setLocalThreshold(Number(e.currentTarget.value))
+                    }
+                    onPointerUp={(e) => {
+                      const confidence_threshold = Number(
+                        (e.currentTarget as HTMLInputElement).value,
+                      )
+                      updateRouting.mutate({ sourceId: source.id, confidence_threshold })
+                    }}
+                    onKeyUp={(e) => {
+                      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return
+                      const el = e.currentTarget as HTMLInputElement
+                      updateRouting.mutate({
+                        sourceId: source.id,
+                        confidence_threshold: Number(el.value),
+                      })
+                    }}
+                    className="w-full"
+                    disabled={!routing.data || savePendingForRow}
+                    aria-label="Confidence threshold"
+                  />
+                  {saveErrorForRow && (
+                    <p className="mt-2 text-sm text-destructive" aria-live="polite">
+                      Couldn't save threshold.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isUploading && (
@@ -152,6 +251,11 @@ function SourceRow({
 }
 
 export function SourcesList({ sources, uploadingSourceId, onUpload }: Props) {
+  const routingQueries = useRoutingConfigsForSourceIds(
+    sources.map((s) => s.id),
+  )
+  const updateRouting = useUpdateRoutingConfig()
+
   if (sources.length === 0) {
     return (
       <motion.div
@@ -198,6 +302,8 @@ export function SourcesList({ sources, uploadingSourceId, onUpload }: Props) {
             isUploading={uploadingSourceId === source.id}
             onUpload={() => onUpload(source.id)}
             onCloseUpload={() => onUpload(null)}
+            routing={routingQueries[i]!}
+            updateRouting={updateRouting}
           />
         </motion.div>
       ))}

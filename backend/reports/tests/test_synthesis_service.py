@@ -8,7 +8,7 @@ Invariants covered:
 """
 
 import json
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -191,6 +191,58 @@ class TestWoWDelta:
             or result.last_week.total_items == 0
         ):
             assert result.delta is None or result.delta.volume_delta is not None
+
+    @pytest.mark.django_db
+    @freeze_time("2026-06-15")
+    def test_recommendation_in_report_period_by_evidence_not_created_at(
+        self, tenant, source
+    ):
+        """INV: rec row can be created later; window is evidence feedback received_at."""
+        from django.utils import timezone
+
+        from analysis.models import Recommendation, RecommendationEvidence
+        from ingestion.models import FeedbackItem
+        from reports.services.synthesis import synthesize_report_data
+
+        window_start = date(2026, 4, 13)
+        window_end = date(2026, 4, 19)
+
+        item = FeedbackItem.objects.create(
+            tenant=tenant,
+            source=source,
+            content="Billing is wrong",
+            received_at=timezone.make_aware(datetime(2026, 4, 15, 12, 0, 0)),
+            sentiment="negative",
+            urgency="high",
+            themes=["billing"],
+            processed_at=timezone.now(),
+        )
+        rec = Recommendation.objects.create(
+            tenant=tenant,
+            title="Fix billing",
+            problem_statement="Wrong charges",
+            proposed_action="Audit",
+            impact_score=0.8,
+            effort_score=0.3,
+            confidence=0.8,
+            priority_score=0.75,
+            status="proposed",
+        )
+        RecommendationEvidence.objects.create(
+            tenant=tenant,
+            recommendation=rec,
+            feedback_item=item,
+            evidence_weight=1.0,
+            selection_reason="test",
+        )
+
+        result = synthesize_report_data(
+            tenant_id=str(tenant.id),
+            period_start=window_start,
+            period_end=window_end,
+        )
+        ids = {r["id"] for r in result.top_recommendations}
+        assert str(rec.id) in ids
 
 
 class TestReportStatusTransitions:

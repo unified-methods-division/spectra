@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     FeedbackItemViewSet,
     IngestionTaskStatusView,
+    RoutingConfigView,
     SourceViewSet,
     UploadFeedbackFileView,
     WebhookFeedbackView,
@@ -28,6 +29,11 @@ urlpatterns = [
         "sources/<uuid:source_id>/webhook/",
         WebhookFeedbackView.as_view(),
         name="webhook-feedback",
+    ),
+    path(
+        "sources/<uuid:source_id>/routing-config/",
+        RoutingConfigView.as_view(),
+        name="routing-config",
     ),
     path("", include(router.urls)),
 ]

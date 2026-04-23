@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Source, FeedbackItem
+from .models import Source, FeedbackItem, RoutingConfig
 
 
 class SourceSerializer(serializers.ModelSerializer):
@@ -61,3 +61,19 @@ class FeedbackItemListSerializer(serializers.ModelSerializer):
             "received_at",
             "processed_at",
         ]
+
+
+class RoutingConfigSerializer(serializers.ModelSerializer):
+    flagged_preview_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = RoutingConfig
+        fields = [
+            "id",
+            "source",
+            "confidence_threshold",
+            "items_below_threshold_action",
+            "updated_at",
+            "flagged_preview_count",
+        ]
+        read_only_fields = ["id", "source", "updated_at", "flagged_preview_count"]

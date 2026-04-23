@@ -26,8 +26,9 @@ describe("MetricLink", () => {
 
     const billingLink = screen.getByRole("link", { name: "billing" })
     expect(billingLink).toHaveAttribute("href", expect.stringContaining("theme=billing"))
-    expect(billingLink).toHaveAttribute("href", expect.stringContaining("date_start=2026-04-13"))
-    expect(billingLink).toHaveAttribute("href", expect.stringContaining("date_end=2026-04-19"))
+    expect(billingLink).toHaveAttribute("href", expect.stringContaining("v=1"))
+    expect(billingLink).toHaveAttribute("href", expect.stringContaining("date_from=2026-04-13"))
+    expect(billingLink).toHaveAttribute("href", expect.stringContaining("date_to=2026-04-19"))
   })
 
   it("url-encodes special characters in theme names", () => {

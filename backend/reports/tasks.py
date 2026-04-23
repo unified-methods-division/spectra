@@ -13,6 +13,7 @@ from reports.models import Report, ReportSection
 from reports.services.synthesis import synthesize_report_data, serialize_synthesis_result
 from reports.services.sections import assemble_sections
 from reports.services.polish import create_fallback_polished
+from reports.services.alerts import create_alerts_for_report
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,13 @@ def generate_report_task(self, report_id: str):
             period_start=report.period_start,
             period_end=report.period_end,
         )
+
+        # Step 3.4: create minimal alerts for drill-down (async side effect ok here)
+        try:
+            create_alerts_for_report(tenant_id=str(report.tenant_id), synthesis=synthesis)
+        except Exception:
+            logger.exception("Alert creation failed for report %s (non-fatal)", report_id)
+
         raw_data = serialize_synthesis_result(synthesis)
         report.raw_data = raw_data
         report.save(update_fields=["raw_data"])

@@ -59,6 +59,16 @@ export async function apiPost<T>(
   return handleResponse<T>(res)
 }
 
+export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: "PUT",
+    headers: headers({ "Content-Type": "application/json" }),
+    credentials: "include",
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  return handleResponse<T>(res)
+}
+
 export async function apiUpload<T>(
   path: string,
   formData: FormData,

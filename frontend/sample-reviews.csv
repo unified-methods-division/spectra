@@ -1,21 +1,61 @@
-content,author,received_at,external_id,metadata
-"I was charged twice for the same subscription on my last invoice. Please refund the duplicate charge.",billing_a,2026-04-01T10:00:00Z,rev-b01,"{""star_rating"": 1}"
-"The billing page shows two identical charges for April. I only authorized one payment.",billing_b,2026-04-01T10:05:00Z,rev-b02,"{""star_rating"": 1}"
-"My credit card was billed twice after I upgraded the plan. Support needs to reverse the extra charge.",billing_c,2026-04-01T10:10:00Z,rev-b03,"{""star_rating"": 1}"
-"Duplicate charge on my invoice again this month. Same amount posted twice to my statement.",billing_d,2026-04-01T10:15:00Z,rev-b04,"{""star_rating"": 1}"
-"I see a double charge on the billing history for the same date. How do I get a refund?",billing_e,2026-04-01T10:20:00Z,rev-b05,"{""star_rating"": 2}"
-"The invoice lists two line items for the same subscription period. That looks like a billing bug.",billing_f,2026-04-01T10:25:00Z,rev-b06,"{""star_rating"": 2}"
-"My account was charged twice for one renewal. I need the duplicate payment removed.",billing_g,2026-04-01T10:30:00Z,rev-b07,"{""star_rating"": 1}"
-"Every time I export to CSV the app crashes before the file finishes downloading.",export_a,2026-04-02T14:00:00Z,rev-e01,"{""star_rating"": 1}"
-"Exporting my report crashes the app on the last step. Happens every time since the update.",export_b,2026-04-02T14:05:00Z,rev-e02,"{""star_rating"": 1}"
-"The export feature freezes and then the application closes. I cannot get a CSV out.",export_c,2026-04-02T14:10:00Z,rev-e03,"{""star_rating"": 1}"
-"When I click export the whole app crashes. Tried on two machines same result.",export_d,2026-04-02T14:15:00Z,rev-e04,"{""star_rating"": 1}"
-"Data export fails and throws me back to the home screen. No file is produced.",export_e,2026-04-02T14:20:00Z,rev-e05,"{""star_rating"": 2}"
-"CSV export consistently crashes before completion. This is blocking my quarterly report.",export_f,2026-04-02T14:25:00Z,rev-e06,"{""star_rating"": 1}"
-"The export dialog starts then the app dies. Need a stable way to download my data.",export_g,2026-04-02T14:30:00Z,rev-e07,"{""star_rating"": 1}"
-"Onboarding asks me to invite teammates but the invite email never arrives and the UI does not explain what went wrong.",onboard_a,2026-04-03T09:00:00Z,rev-o01,"{""star_rating"": 3}"
-"I cannot figure out how to add a team member during onboarding. The steps are unclear.",onboard_b,2026-04-03T09:05:00Z,rev-o02,"{""star_rating"": 3}"
-"The first-run onboarding flow is confusing. I spent twenty minutes trying to add someone to my workspace.",onboard_c,2026-04-03T09:10:00Z,rev-o03,"{""star_rating"": 3}"
-"Getting started is painful. Onboarding should walk me through inviting my team more clearly.",onboard_d,2026-04-03T09:15:00Z,rev-o04,"{""star_rating"": 2}"
-"The setup wizard for new accounts skips how to add collaborators. I felt lost after signup.",onboard_e,2026-04-03T09:20:00Z,rev-o05,"{""star_rating"": 3}"
-"New user onboarding does not make it obvious how to invite colleagues to the project.",onboard_f,2026-04-03T09:25:00Z,rev-o06,"{""star_rating"": 3}"
+content,rating,title,helpful_vote_count,author,received_at,external_id
+"Absolutely love the new dashboard — finally see trends without exporting. Ship more of this.",5,Best update in months,42,alex.m,2026-03-30T09:15:00Z,gold-pos-001
+"Onboarding was smooth; had my team imported in under ten minutes.",5,Fast setup,18,jordan.k,2026-03-31T14:22:00Z,gold-pos-002
+"Support resolved my billing question same day. Polite and knew the product.",5,Great support experience,31,riley.p,2026-04-01T11:03:00Z,gold-pos-003
+"The CSV export includes exactly the columns we need for finance. Thank you.",4,Export works for accounting,9,sam.t,2026-04-02T16:40:00Z,gold-pos-004
+"Mobile app feels snappy now — no more frozen scroll on long threads.",4,Performance improved,27,morgan.d,2026-04-03T08:55:00Z,gold-pos-005
+"Neutral: product is fine for basic reporting. Nothing exciting but it works.",3,Fine not flashy,4,casey.w,2026-04-04T19:10:00Z,gold-neu-001
+"Meh. Does the job. Wish there were more templates out of the box.",3,Okay tool,2,devon.l,2026-04-05T10:00:00Z,gold-neu-002
+"Invoice line items still wrong after the March update — finance is blocking rollout.",1,Billing totals mismatch,67,taylor.h,2026-04-06T07:30:00Z,gold-neg-billing-001
+"Charged twice for the same seat. Support ticket open five days with no resolution.",1,Double charge,89,avery.n,2026-04-06T09:12:00Z,gold-neg-billing-002
+"Annual renewal quote jumped 40% with no warning. Considering alternatives.",2,Surprise price hike,54,quinn.r,2026-04-07T13:45:00Z,gold-neg-pricing-001
+"Export to Excel truncates long text fields — we are losing customer quotes in reports.",2,Export truncates text,41,jamie.c,2026-04-08T15:20:00Z,gold-neg-export-001
+"PDF export is blank for any report over 500 rows. This is blocking our board deck.",1,PDF export broken,73,reese.m,2026-04-08T17:05:00Z,gold-neg-export-002
+"App becomes unusable with 10k+ feedback items — search takes 30+ seconds.",1,Performance at scale,95,skyler.b,2026-04-09T08:00:00Z,gold-neg-perf-001
+"Dashboard graphs spin forever on Chrome on M1. Safari is slightly better.",2,Slow dashboards,38,rowan.f,2026-04-09T10:33:00Z,gold-neg-perf-002
+"First-run wizard crashed when I skipped SSO. Had to clear cookies to recover.",2,Onboarding crash,29,eden.v,2026-04-10T12:18:00Z,gold-neg-onboard-001
+"Invite emails land in spam for half our org. IT says your SPF records look wrong.",2,Email deliverability,22,blake.s,2026-04-10T14:50:00Z,gold-neg-onboard-002
+"Screen reader user: many buttons lack labels. Had to guess what icons do.",1,Accessibility gaps,61,cameron.j,2026-04-11T09:25:00Z,gold-neg-a11y-001
+"Keyboard navigation breaks inside the filter drawer — tab order is a mess.",2,Keyboard trap in filters,33,drew.k,2026-04-11T11:40:00Z,gold-neg-a11y-002
+"Live chat wait time 45+ minutes. Bot kept looping on password reset.",2,Support wait times,47,parker.q,2026-04-12T08:15:00Z,gold-neg-support-001
+"Agent closed my ticket as solved without reading the attachment. Frustrating.",1,Ticket mishandled,58,sage.y,2026-04-12T10:22:00Z,gold-neg-support-002
+"Love the product but the iOS app crashes when opening image attachments.",3,Mixed — great web awful mobile,19,finley.g,2026-04-13T07:55:00Z,gold-mix-001
+"Solid analytics. Hate that I cannot schedule email digests to stakeholders.",3,Good core missing digests,14,harper.e,2026-04-13T09:30:00Z,gold-mix-002
+"New dark mode is gorgeous. Still waiting on proper SAML group mapping.",4,UI win SSO gap,25,emery.o,2026-04-13T11:05:00Z,gold-mix-003
+"Security team flagged lack of audit log export for compliance. Deal breaker for us.",2,Compliance audit logs,44,indigo.a,2026-04-14T08:40:00Z,gold-neg-security-001
+"We need field-level encryption for PII. Roadmap says maybe next year.",2,Privacy requirements,31,marlowe.z,2026-04-14T10:12:00Z,gold-neg-security-002
+"Trend detection surfaced a spike in refund mentions — super actionable.",5,Alerts useful,36,nova.x,2026-04-14T13:00:00Z,gold-pos-trends-001
+"Widget for embedding summaries would make this a no-brainer for our portal.",4,Feature request embed,8,lyric.h,2026-04-14T15:28:00Z,gold-pos-feature-001
+"Please add bulk tag editing — clicking one by one is killing us.",3,Bulk edit request,19,rivers.c,2026-04-15T08:20:00Z,gold-neu-feature-001
+"Webhook retries are flaky; we missed three events last night.",2,Unreliable webhooks,52,echo.d,2026-04-15T09:45:00Z,gold-neg-integ-001
+"API rate limits too low for nightly sync. Had to split into six jobs.",2,API limits,28,phoenix.w,2026-04-15T11:10:00Z,gold-neg-integ-002
+"Documentation for custom fields is outdated — examples return 404.",2,Docs drift,15,true.n,2026-04-15T14:33:00Z,gold-neg-docs-001
+"Delighted with sentiment accuracy on our multilingual corpus (EN/ES).",5,Multilingual quality,23,sol.r,2026-04-16T08:50:00Z,gold-pos-ml-001
+"Classifier tags 'bug' on every mention of our product name. Noise is high.",2,Tagging noise,41,marin.l,2026-04-16T10:15:00Z,gold-neg-ml-001
+"Neutral tone: UI refresh is pretty but learning curve went up for casual users.",3,Prettier harder,6,jo.d,2026-04-16T12:00:00Z,gold-neu-ux-001
+"Regression: saved filters disappeared after last deploy. Had to rebuild twelve.",1,Data loss filters,76,kai.t,2026-04-16T14:22:00Z,gold-neg-regression-001
+"Kudos for transparent changelog — rare in B2B SaaS.",5,Changelog culture,12,gray.p,2026-04-17T09:05:00Z,gold-pos-ops-001
+"Status page showed green while we had 500s for an hour. Erodes trust.",2,Status page inaccurate,63,bailey.k,2026-04-17T10:40:00Z,gold-neg-reliability-001
+"Team collaboration notes on feedback items are a game changer.",5,Collaboration win,34,shiloh.m,2026-04-17T13:18:00Z,gold-pos-collab-001
+"Cannot restrict project access by region — GDPR concern for EU subsidiaries.",2,Access control gaps,39,remy.b,2026-04-17T15:55:00Z,gold-neg-governance-001
+"Positive: imports from Zendesk worked first try. Negative: no two-way sync yet.",3,Zendesk import only one-way,17,ellis.v,2026-04-18T08:30:00Z,gold-mix-004
+"Love the drill-down from alert to verbatim. Exactly what execs asked for.",5,Alert drill-down,29,oren.s,2026-04-18T10:00:00Z,gold-pos-alerts-001
+"Alerts fire too often on small samples — statistical noise drowns signal.",2,Alert sensitivity,24,jules.q,2026-04-18T11:25:00Z,gold-neg-alerts-001
+"Export column mapping UI is confusing; took three tries to get dates right.",3,Export UX friction,11,kit.f,2026-04-18T13:50:00Z,gold-neu-export-ux-001
+"Performance on mobile web improved but still janky when expanding clusters.",3,Mobile web mixed,9,tegan.r,2026-04-18T16:05:00Z,gold-mix-005
+"Billing portal shows wrong tax jurisdiction for Canada — legal is upset.",1,Tax jurisdiction wrong,81,nia.h,2026-04-19T07:15:00Z,gold-neg-billing-003
+"Refund processed quickly after I escalated on Twitter. Mixed feelings on channel.",3,Refund ok path painful,7,ida.c,2026-04-19T09:40:00Z,gold-mix-006
+"Neutral: reporting is accurate; wish we could blend NPS and CSAT in one view.",3,Separate scores awkward,5,lu.w,2026-04-19T11:20:00Z,gold-neu-analytics-001
+"Feature idea: cohort analysis by signup month for retention themes.",4,Cohort feature request,6,vashti.o,2026-04-19T13:55:00Z,gold-pos-roadmap-001
+"Critical: SSO login loop for Okta users on incognito. Blocks entire division.",1,SSO loop Okta,102,ida.m,2026-04-20T08:10:00Z,gold-neg-sso-001
+"Search syntax is undocumented — OR queries behave inconsistently.",2,Search UX,18,aran.k,2026-04-20T09:35:00Z,gold-neg-search-001
+"Beautiful summaries; our PMs actually read them now.",5,Summary quality,45,mina.t,2026-04-20T11:00:00Z,gold-pos-summary-001
+"Still no way to attach contracts to a tenant record — sales needs this.",3,Attachments gap,13,ida.p,2026-04-20T12:45:00Z,gold-neu-sales-001
+"Latency spike during EU morning — US team does not feel it. Regional issue?",3,Regional latency,16,orin.d,2026-04-20T14:30:00Z,gold-mix-007
+"Positive surprise: migration concierge called unprompted. White-glove.",5,Concierge win,33,bea.n,2026-04-21T07:50:00Z,gold-pos-csm-001
+"Negative: roadmap promises slipped twice. Trust is wearing thin.",2,Roadmap slips,40,ciel.b,2026-04-21T09:15:00Z,gold-neg-trust-001
+"Exploring competitor because bulk pricing is opaque for 500+ seats.",2,Enterprise pricing opaque,27,ida.r,2026-04-21T10:40:00Z,gold-neg-enterprise-001
+"Theme clustering nailed 'export pain' vs 'billing pain' — helpful separation.",4,Clustering quality,22,ida.s,2026-04-21T12:05:00Z,gold-pos-themes-001
+"False positive: marked as urgent but text is clearly sarcastic praise.",2,Sarcasm misread,14,ida.v,2026-04-21T13:30:00Z,gold-neg-sentiment-001
+"Accessibility: focus ring invisible in high contrast mode.",2,HC mode focus,19,ida.w,2026-04-21T15:00:00Z,gold-neg-a11y-003
+"Love small touches like keyboard shortcut cheat sheet overlay.",5,Power user delight,11,ida.x,2026-04-21T16:20:00Z,gold-pos-polish-001

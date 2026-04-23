@@ -11,10 +11,11 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import FeedbackItem, Source
+from .models import FeedbackItem, RoutingConfig, Source
 from .serializers import (
     FeedbackItemListSerializer,
     FeedbackItemSerializer,
+    RoutingConfigSerializer,
     SourceSerializer,
 )
 from .tasks import parse_uploaded_feedback_file
@@ -195,3 +196,56 @@ class IngestionTaskStatusView(APIView):
             payload["error"] = str(task_result.result)
 
         return Response(payload, status=status.HTTP_200_OK)
+
+
+class RoutingConfigView(APIView):
+    """
+    Get/update per-source routing config.
+
+    Step 3.4: confidence threshold slider + live preview.
+    """
+
+    def get(self, request, source_id: str):
+        source = get_object_or_404(Source, id=source_id)
+        cfg, _ = RoutingConfig.objects.get_or_create(
+            source=source,
+            defaults={"tenant": request.tenant},
+        )
+        return Response(_serialize_with_preview(cfg), status=status.HTTP_200_OK)
+
+    def put(self, request, source_id: str):
+        source = get_object_or_404(Source, id=source_id)
+        cfg, _ = RoutingConfig.objects.get_or_create(
+            source=source,
+            defaults={"tenant": request.tenant},
+        )
+
+        threshold_raw = request.data.get("confidence_threshold")
+        try:
+            threshold = float(threshold_raw)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "confidence_threshold must be a number."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if threshold < 0 or threshold > 1:
+            return Response(
+                {"detail": "confidence_threshold must be between 0 and 1."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        cfg.confidence_threshold = threshold
+        cfg.save(update_fields=["confidence_threshold", "updated_at"])
+        return Response(_serialize_with_preview(cfg), status=status.HTTP_200_OK)
+
+
+def _serialize_with_preview(cfg: RoutingConfig) -> dict:
+    flagged = (
+        FeedbackItem.objects.filter(source_id=cfg.source_id)
+        .exclude(sentiment_confidence__isnull=True)
+        .filter(sentiment_confidence__lt=cfg.confidence_threshold)
+        .count()
+    )
+    payload = RoutingConfigSerializer(cfg).data
+    payload["flagged_preview_count"] = flagged
+    return payload

@@ -54,10 +54,10 @@ export function MetricLink({
       )
     }
 
-    const searchParams = new URLSearchParams({
-      date_start: periodStart,
-      date_end: periodEnd,
-      ...pattern.filters,
+    const searchParams = buildEvidenceSearchParams({
+      periodStart,
+      periodEnd,
+      filters: pattern.filters,
     })
 
     elements.push(
@@ -133,6 +133,22 @@ function extractLinkablePatterns(
   }
 
   return patterns
+}
+
+function buildEvidenceSearchParams(opts: {
+  periodStart: string
+  periodEnd: string
+  filters: Record<string, string>
+}): URLSearchParams {
+  // Canonical v1 deep-linking: absolute range + stable filter keys
+  // - Explorer expects `date_from` / `date_to`
+  // - Include `v=1` for forward-compatible parsing
+  return new URLSearchParams({
+    v: "1",
+    date_from: opts.periodStart,
+    date_to: opts.periodEnd,
+    ...opts.filters,
+  })
 }
 
 function extractThemesFromContent(

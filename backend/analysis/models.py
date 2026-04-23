@@ -116,6 +116,28 @@ class RecommendationEvidence(models.Model):
         ]
 
 
+class GoldSetItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "core.Tenant", on_delete=models.CASCADE, related_name="gold_set_items"
+    )
+    feedback_item = models.ForeignKey(
+        "ingestion.FeedbackItem",
+        on_delete=models.CASCADE,
+        related_name="gold_set_items",
+    )
+    gold_sentiment = models.TextField()
+    gold_urgency = models.TextField()
+    gold_themes = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "gold_set_items"
+        indexes = [
+            models.Index(fields=["tenant"], name="idx_goldset_tenant"),
+        ]
+
+
 class RecommendationOutcome(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(

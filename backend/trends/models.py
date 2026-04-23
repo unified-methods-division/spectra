@@ -2,23 +2,21 @@ import uuid
 
 from django.db import models
 
-from ingestion.models import FeedbackItem
-
 
 class TrendSnapshot(models.Model):
+    """Snapshot of label-quality metrics for a tenant on a given day.
+
+    ``metrics`` JSON shape (see ``trends.engine``): ``total_accuracy`` (float),
+    ``accuracy_by_theme``, ``accuracy_by_sentiment``, ``accuracy_by_urgency``
+    (each a slug/label → accuracy float).
+    """
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(
         "core.Tenant", on_delete=models.CASCADE, related_name="trend_snapshots"
     )
     snapshot_date = models.DateField()
-    metrics = models.JSONField(
-        {
-            "total_accuracy": float,
-            "accuracy_by_theme": dict[str, float],
-            "accuracy_by_sentiment": dict[FeedbackItem.Sentiment, float],
-            "accuracy_by_urgency": dict[FeedbackItem.Urgency, float],
-        }
-    )
+    metrics = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

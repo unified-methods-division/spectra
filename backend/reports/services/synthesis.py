@@ -9,10 +9,10 @@ from dataclasses import dataclass, asdict
 from datetime import date, timedelta
 from typing import Optional
 
-from django.db.models import Count
+from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
 
-from analysis.models import Recommendation
+from analysis.models import Recommendation, RecommendationEvidence
 from ingestion.models import FeedbackItem
 from trends.models import TrendSnapshot, Alert
 from reports.services.scoring import rank_recommendations
@@ -79,11 +79,28 @@ def synthesize_report_data(
         _compute_deltas(this_week, last_week) if last_week.total_items > 0 else None
     )
 
-    recommendations = Recommendation.objects.filter(
-        tenant_id=tenant_id,
-        created_at__date__gte=period_start,
-        created_at__date__lte=period_end,
-        status__in=["proposed", "accepted"],
+    # Recommendations belong to a report period via supporting evidence (feedback
+    # received in-window), not via Recommendation.created_at (a rec authored later
+    # can still cover an earlier week). Legacy rows with no evidence still match
+    # on created_at for backward compatibility.
+    evidence_in_period = RecommendationEvidence.objects.filter(
+        recommendation_id=OuterRef("pk"),
+        feedback_item__received_at__date__gte=period_start,
+        feedback_item__received_at__date__lte=period_end,
+    )
+    recommendations = (
+        Recommendation.objects.filter(
+            tenant_id=tenant_id,
+            status__in=["proposed", "accepted"],
+        )
+        .filter(
+            Q(Exists(evidence_in_period))
+            | Q(
+                created_at__date__gte=period_start,
+                created_at__date__lte=period_end,
+            )
+        )
+        .distinct()
     )
     ranked = rank_recommendations(list(recommendations))
     top_recs = [

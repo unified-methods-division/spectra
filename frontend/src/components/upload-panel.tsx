@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { useUploadFile, useTaskStatus } from "@/hooks/use-sources"
@@ -38,6 +38,10 @@ export function UploadPanel({ sourceId, onClose, onStepChange }: Props) {
   const [panel, setPanel] = useState<PanelState>(initialPanelState)
   const { step, file, taskId, dragOver } = panel
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useLayoutEffect(() => {
+    onStepChange?.(initialPanelState.step)
+  }, [onStepChange, sourceId])
 
   const upload = useUploadFile(sourceId)
   const task = useTaskStatus(taskId, { sourceId })
