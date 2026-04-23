@@ -1,6 +1,6 @@
 # Spectra
 
-Open-source tool for turning user feedback from multiple channels into prioritized product decisions. Spectra dissects raw feedback into component signals — themes, sentiment, urgency — so teams can act on what matters. Ingests feedback via CSV/JSONL upload or webhook, classifies it with AI (sentiment, themes, urgency), generates embeddings for semantic search, and surfaces trends and recommendations.
+Turn user feedback into product decisions. Ingest from CSV/JSONL or webhooks, classify with AI (sentiment, themes, urgency), embed for semantic search, and surface trends and recommendations.
 
 ## Stack
 
@@ -21,7 +21,7 @@ Open-source tool for turning user feedback from multiple channels into prioritiz
 
 ### Git hooks (Conventional Commits)
 
-Once per clone, point Git at this repo’s hooks (validates subject line + a small banned-word list; see [`.githooks/commit-msg`](.githooks/commit-msg) and [`.cursor/rules/conventional-commits.mdc`](.cursor/rules/conventional-commits.mdc)):
+Once per clone, point Git at this repo's hooks (validates subject line + a small banned-word list; see [`.githooks/commit-msg`](.githooks/commit-msg) and [`.cursor/rules/conventional-commits.mdc`](.cursor/rules/conventional-commits.mdc)):
 
 ```bash
 git config core.hooksPath .githooks
