@@ -84,13 +84,10 @@ if RUNNING_TESTS and USE_SQLITE_FOR_TESTS:
         "reports": None,
     }
 elif DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
-        )
-    }
+    kwargs = {"conn_max_age": 600}
+    if "sslmode=require" in DATABASE_URL:
+        kwargs["ssl_require"] = True
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL, **kwargs)}
 else:
     DATABASES = {
         "default": {
