@@ -50,9 +50,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           className="flex items-center gap-2"
           aria-label="Home"
         >
-          <span className="text-lg leading-none group-data-[collapsible=icon]:text-xl">&#x1f4ca;</span>
           <span className="text-[15px] font-semibold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden">
-            Intelligence
+            Spectra
           </span>
         </Link>
       </SidebarHeader>

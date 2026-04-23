@@ -1,6 +1,6 @@
-# Feedback Intelligence Platform
+# Spectra
 
-Open-source tool for turning user feedback from multiple channels into prioritized product decisions. Ingests feedback via CSV/JSONL upload or webhook, classifies it with AI (sentiment, themes, urgency), generates embeddings for semantic search, and surfaces trends and recommendations.
+Open-source tool for turning user feedback from multiple channels into prioritized product decisions. Spectra dissects raw feedback into component signals — themes, sentiment, urgency — so teams can act on what matters. Ingests feedback via CSV/JSONL upload or webhook, classifies it with AI (sentiment, themes, urgency), generates embeddings for semantic search, and surfaces trends and recommendations.
 
 ## Stack
 

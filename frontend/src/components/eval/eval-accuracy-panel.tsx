@@ -51,8 +51,8 @@ export function EvalAccuracyPanel() {
   const { data, isLoading, error } = useDriftDelta(4)
 
   return (
-    <div className="rounded-xl border border-foreground/8 bg-card/80 backdrop-blur-xl p-5">
-      <p className="mb-3 text-xs font-medium tracking-[0.15em] text-muted-foreground/50 uppercase">
+    <div className="rounded-lg border border-foreground/6 bg-card/80 backdrop-blur-sm px-4 py-3">
+      <p className="mb-3 text-[10px] font-semibold tracking-[0.2em] text-muted-foreground/50 uppercase">
         Accuracy drift
       </p>
 

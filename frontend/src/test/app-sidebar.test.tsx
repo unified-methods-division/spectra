@@ -111,8 +111,7 @@ describe("App sidebar", () => {
   it("renders the logo section", () => {
     renderWithRouter("/explorer")
 
-    expect(screen.getByText("Feedback")).toBeInTheDocument()
-    expect(screen.getByText("Intelligence")).toBeInTheDocument()
+    expect(screen.getByText("Spectra")).toBeInTheDocument()
   })
 
   it("section labels have muted-foreground/40 styling", () => {

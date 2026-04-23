@@ -1,4 +1,4 @@
-# Brand Guidelines — Feedback Intelligence
+# Brand Guidelines — Spectra
 
 ## Personality
 
@@ -82,7 +82,7 @@ Sentiment appears as colored text on the word itself — not badge backgrounds. 
 ### Sidebar (220px)
 
 - No border, no distinct background — sits on the same surface as the page
-- Logo: "FEEDBACK" as tiny tracked uppercase (category), "Intelligence" as 15px medium (name)
+- Logo: "Spectra" as 15px medium
 - Nav items: `+` prefix in monospace (primary-colored when active, muted when not)
 - Active state: bold text + lit `+` — no pills, no bars, no background
 - The sidebar should feel like a document margin, not a toolbar

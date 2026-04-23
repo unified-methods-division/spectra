@@ -1,4 +1,4 @@
-session_name: feedback-intelligence
+session_name: spectra
 start_directory: ./
 windows:
   - window_name: redis
