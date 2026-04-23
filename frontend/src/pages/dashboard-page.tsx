@@ -7,6 +7,9 @@ import {
   useDashboardSummary,
   type DashboardSummaryPeriod,
 } from "@/lib/api/trends"
+import { DisagreementRateCard } from "@/components/eval/disagreement-rate-card"
+import { DriftDeltaChart } from "@/components/eval/drift-delta-chart"
+import { EvalAccuracyPanel } from "@/components/eval/eval-accuracy-panel"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -358,6 +361,12 @@ export function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <DisagreementRateCard />
+            <DriftDeltaChart />
+            <EvalAccuracyPanel />
           </div>
         </div>
       </div>

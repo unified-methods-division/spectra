@@ -69,6 +69,15 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
   return handleResponse<T>(res)
 }
 
+export async function apiDelete<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: "DELETE",
+    headers: headers({ "Content-Type": "application/json" }),
+    credentials: "include",
+  })
+  return handleResponse<T>(res)
+}
+
 export async function apiUpload<T>(
   path: string,
   formData: FormData,

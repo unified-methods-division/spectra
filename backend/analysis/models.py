@@ -30,6 +30,42 @@ class Correction(models.Model):
         ]
 
 
+class CorrectionDisagreement(models.Model):
+    class ResolutionStatus(models.TextChoices):
+        PENDING = "pending", "Pending"
+        RESOLVED = "resolved", "Resolved"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "core.Tenant", on_delete=models.CASCADE, related_name="correction_disagreements"
+    )
+    feedback_item = models.ForeignKey(
+        "ingestion.FeedbackItem",
+        on_delete=models.CASCADE,
+        related_name="correction_disagreements",
+    )
+    field_corrected = models.TextField(choices=Correction.CorrectedField.choices)
+    correction_ids = models.JSONField()
+    resolution_status = models.TextField(
+        choices=ResolutionStatus.choices, default=ResolutionStatus.PENDING
+    )
+    resolved_value = models.JSONField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "correction_disagreements"
+        indexes = [
+            models.Index(fields=["tenant", "resolution_status"], name="idx_disagree_tenant_status"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "feedback_item", "field_corrected"],
+                name="uq_disagree_tenant_item_field",
+            ),
+        ]
+
+
 class PromptVersion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(
@@ -43,6 +79,7 @@ class PromptVersion(models.Model):
     accuracy_at_creation = models.FloatField(null=True, blank=True)
     accuracy_current = models.FloatField(null=True, blank=True)
     active = models.BooleanField(default=False)
+    regression_note = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -133,6 +170,12 @@ class GoldSetItem(models.Model):
 
     class Meta:
         db_table = "gold_set_items"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "feedback_item"],
+                name="uq_goldset_tenant_item",
+            ),
+        ]
         indexes = [
             models.Index(fields=["tenant"], name="idx_goldset_tenant"),
         ]
@@ -160,6 +203,12 @@ class RecommendationOutcome(models.Model):
 
     class Meta:
         db_table = "recommendation_outcomes"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recommendation", "metric_name", "measured_at"],
+                name="uq_reco_outcome_rec_metric_date",
+            ),
+        ]
         indexes = [
             models.Index(
                 fields=["recommendation", "-measured_at"],

@@ -4,6 +4,26 @@ from . import views
 
 urlpatterns = [
     path(
+        "eval/drift/",
+        views.eval_drift,
+        name="eval-drift",
+    ),
+    path(
+        "eval/gold/",
+        views.eval_gold,
+        name="eval-gold",
+    ),
+    path(
+        "gold-set/",
+        views.GoldSetItemListCreateView.as_view(),
+        name="gold-set-list-create",
+    ),
+    path(
+        "gold-set/<uuid:pk>/",
+        views.GoldSetItemDestroyView.as_view(),
+        name="gold-set-destroy",
+    ),
+    path(
         "sources/<uuid:source_id>/processing-status/",
         views.ProcessingStatusView.as_view(),
         name="processing-status",
@@ -19,6 +39,11 @@ urlpatterns = [
         name="recommendation-list",
     ),
     path(
+        "recommendations/<uuid:recommendation_id>/outcome/",
+        views.recommendation_outcome,
+        name="recommendation-outcome",
+    ),
+    path(
         "recommendations/<uuid:recommendation_id>/",
         views.recommendation_detail,
         name="recommendation-detail",
@@ -27,5 +52,20 @@ urlpatterns = [
         "recommendations/<uuid:recommendation_id>/decide/",
         views.recommendation_decide,
         name="recommendation-decide",
+    ),
+    path(
+        "disagreements/",
+        views.disagreement_list,
+        name="disagreement-list",
+    ),
+    path(
+        "disagreements/rate/",
+        views.disagreement_rate_view,
+        name="disagreement-rate",
+    ),
+    path(
+        "disagreements/<uuid:disagreement_id>/resolve/",
+        views.disagreement_resolve,
+        name="disagreement-resolve",
     ),
 ]

@@ -5,6 +5,7 @@ const navItems = [
   { label: "Explorer", href: "/explorer" },
   { label: "Sources", href: "/sources" },
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Eval", href: "/eval" },
   { label: "Themes", href: "/themes" },
   { label: "Reports", href: "/reports" },
 ]

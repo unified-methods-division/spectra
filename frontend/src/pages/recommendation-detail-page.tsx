@@ -6,6 +6,7 @@ import {
   useRecommendation,
   type RecommendationStatus,
 } from "@/lib/api/recommendations"
+import { RecommendationOutcomeCard } from "@/components/eval/recommendation-outcome-card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -199,6 +200,10 @@ export function RecommendationDetailPage() {
                   </div>
                 )}
               </div>
+
+              {rec.status === "accepted" && (
+                <RecommendationOutcomeCard recommendationId={rec.id} />
+              )}
             </div>
           )}
         </div>

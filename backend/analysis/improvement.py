@@ -1,4 +1,6 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
+from django.utils import timezone
+from analysis.eval import run_gold_eval
 from analysis.models import Correction, PromptVersion
 from trends.engine import measure_accuracy
 from collections import defaultdict
@@ -22,10 +24,9 @@ def assess_corrections(
     corrections = (
         Correction.objects.filter(
             tenant_id=tenant_id,
-            created_at__gte=start_date,
-            created_at__lte=end_date,
+            created_at__gte=timezone.make_aware(datetime.combine(start_date, time.min)),
+            created_at__lte=timezone.make_aware(datetime.combine(end_date, time.max)),
         )
-        # Recent ones over the past week
         .order_by("created_at")
     )
 
@@ -95,6 +96,22 @@ def assess_corrections(
         .order_by("-version")
         .first()
     )
+
+    gold_result = run_gold_eval(tenant_id)
+
+    if gold_result.items_evaluated > 0:
+        prompt_version.accuracy_at_creation = gold_result.overall_accuracy
+        prompt_version.save()
+
+        if previous_prompt_version and previous_prompt_version.accuracy_current is not None:
+            if gold_result.overall_accuracy < previous_prompt_version.accuracy_current:
+                prompt_version.regression_note = (
+                    f"Gold-set eval accuracy {gold_result.overall_accuracy:.4f}"
+                    f" < previous {previous_prompt_version.accuracy_current:.4f}"
+                )
+                prompt_version.active = False
+                prompt_version.save()
+                return prompt_version
 
     if (
         not previous_prompt_version

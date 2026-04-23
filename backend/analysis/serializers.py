@@ -2,7 +2,14 @@ from rest_framework import serializers
 
 from ingestion.models import FeedbackItem
 
-from .models import Correction, Recommendation, RecommendationEvidence
+from .models import (
+    Correction,
+    CorrectionDisagreement,
+    GoldSetItem,
+    Recommendation,
+    RecommendationEvidence,
+    RecommendationOutcome,
+)
 
 
 class CorrectionSerializer(serializers.ModelSerializer):
@@ -101,6 +108,20 @@ class RecommendationSerializer(serializers.ModelSerializer):
         return sorted(themes)
 
 
+class DisagreementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CorrectionDisagreement
+        fields = [
+            "id", "feedback_item", "field_corrected", "correction_ids",
+            "resolution_status", "resolved_value", "resolved_at", "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class DisagreementResolveSerializer(serializers.Serializer):
+    resolved_value = serializers.JSONField()
+
+
 class RecommendationDecisionSerializer(serializers.Serializer):
     status = serializers.ChoiceField(
         choices=[
@@ -110,3 +131,41 @@ class RecommendationDecisionSerializer(serializers.Serializer):
         ]
     )
     decision_owner = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
+class OutcomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecommendationOutcome
+        fields = [
+            "id", "recommendation", "measured_at", "metric_name",
+            "baseline_value", "current_value", "delta", "interpretation", "created_at",
+        ]
+        read_only_fields = fields
+
+
+class GoldSetItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoldSetItem
+        fields = [
+            "id",
+            "feedback_item",
+            "gold_sentiment",
+            "gold_urgency",
+            "gold_themes",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+    def validate_feedback_item(self, value):
+        request = self.context.get("request")
+        if request and value.tenant_id != request.tenant.id:
+            raise serializers.ValidationError("Feedback item does not belong to this tenant.")
+        return value
+
+
+class DriftDeltaSerializer(serializers.Serializer):
+    week_start = serializers.DateField()
+    week_end = serializers.DateField()
+    accuracy = serializers.FloatField()
+    prev_accuracy = serializers.FloatField(allow_null=True)
+    delta = serializers.FloatField(allow_null=True)
