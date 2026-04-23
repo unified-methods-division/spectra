@@ -244,6 +244,7 @@ dependencies = [
     { name = "django" },
     { name = "django-cors-headers" },
     { name = "djangorestframework" },
+    { name = "google-play-scraper" },
     { name = "pgvector" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
@@ -273,6 +274,7 @@ requires-dist = [
     { name = "django", specifier = ">=6.0.3" },
     { name = "django-cors-headers", specifier = ">=4.9.0" },
     { name = "djangorestframework", specifier = ">=3.17.1" },
+    { name = "google-play-scraper", specifier = ">=1.2.5" },
     { name = "pgvector", specifier = ">=0.4.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.3" },
     { name = "pydantic", specifier = ">=2.12.5" },
@@ -1041,6 +1043,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/74/dd/28e4682904b183acbfad3fe6409f13a42f69bb8eab6e882d3bcbea1dde01/google_genai-1.70.0.tar.gz", hash = "sha256:36b67b0fc6f319e08d1f1efd808b790107b1809c8743a05d55dfcf9d9fad7719", size = 519550, upload-time = "2026-04-01T10:52:46.487Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/36/a3/d4564c8a9beaf6a3cef8d70fa6354318572cebfee65db4f01af0d41f45ba/google_genai-1.70.0-py3-none-any.whl", hash = "sha256:b74c24549d8b4208f4c736fd11857374788e1ffffc725de45d706e35c97fceee", size = 760584, upload-time = "2026-04-01T10:52:44.349Z" },
+]
+
+[[package]]
+name = "google-play-scraper"
+version = "1.2.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/29/3530af5fee212e7cdd31a5847ecb306c8202745f08dc608de10454a82499/google_play_scraper-1.2.7.tar.gz", hash = "sha256:284f321d1b2c39e39e97e490d51bc316e1d876802360efb7e7463b5c16ed4972", size = 41734, upload-time = "2024-06-07T01:03:11.325Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/33/f7/a23ef3cf8efc9ab3aee565971f59906811e6ce95475314ef7b18d02f30ba/google_play_scraper-1.2.7-py3-none-any.whl", hash = "sha256:a485510b09265f0096fc3813cfc26eef27e9a5c0035f99ee23f80e00de724530", size = 28988, upload-time = "2024-06-07T01:03:09.144Z" },
 ]
 
 [[package]]

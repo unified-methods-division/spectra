@@ -1,3 +1,4 @@
+import json
 from datetime import date, datetime, time, timedelta
 from django.utils import timezone
 from analysis.eval import run_gold_eval
@@ -31,14 +32,16 @@ def assess_corrections(
     )
 
     # loop through corrections and store the occurence of items sharing the same field, human value and ai value
-    occurrences: defaultdict[tuple[str, str, str], int] = defaultdict(int)
+    occurrences: dict[tuple[str, str, str], int] = {}
     for correction in corrections:
+        ai_val = correction.ai_value if not isinstance(correction.ai_value, list) else json.dumps(correction.ai_value, sort_keys=True)
+        human_val = correction.human_value if not isinstance(correction.human_value, list) else json.dumps(correction.human_value, sort_keys=True)
         key = (
             correction.field_corrected,
-            correction.human_value,
-            correction.ai_value,
+            str(human_val),
+            str(ai_val),
         )
-        occurrences[key] += 1
+        occurrences[key] = occurrences.get(key, 0) + 1
 
     # improvement candidates are corrections with occurrences >= 5
     improvement_candidates = [key for key, count in occurrences.items() if count >= 5]

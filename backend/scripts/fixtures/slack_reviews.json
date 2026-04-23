@@ -1,0 +1,177 @@
+[
+  {
+    "reviewId": "gp:slack001",
+    "content": "Slack has been essential for our team communication. The channels feature keeps conversations organized and searchable. The mobile app works well for quick check-ins on the go.",
+    "userName": " productivityFan42",
+    "at": "2026-04-20T09:15:00Z",
+    "score": 5
+  },
+  {
+    "reviewId": "gp:slack002",
+    "content": "Billing is a nightmare. Got charged for users who left the org two months ago. Support took three weeks to respond and still hasn't issued a refund. No transparency in the billing dashboard either.",
+    "userName": "frustratedAdmin",
+    "at": "2026-04-19T14:30:00Z",
+    "score": 1
+  },
+  {
+    "reviewId": "gp:slack003",
+    "content": "Search is painfully slow, especially in channels with thousands of messages. I type a keyword and wait 10+ seconds for results. Sometimes it even times out. For a tool this expensive, search should be instant.",
+    "userName": "dataAnalyst_Mike",
+    "at": "2026-04-19T11:45:00Z",
+    "score": 2
+  },
+  {
+    "reviewId": "gp:slack004",
+    "content": "Onboarding new team members is confusing. The interface has too many buttons and panels. Would love a simplified first-time experience that walks people through basic features instead of dumping them into the full UI.",
+    "userName": "newbieHelper",
+    "at": "2026-04-18T16:20:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack005",
+    "content": "Notifications are all over the place. I get pinged for things that don't matter and miss important DMs. The 'mention only' setting still sends me every thread reply. Really needs better granularity.",
+    "userName": "overwhelmedPM",
+    "at": "2026-04-18T10:05:00Z",
+    "score": 2
+  },
+  {
+    "reviewId": "gp:slack006",
+    "content": "The desktop app uses way too much RAM. With 4 channels open I'm at 1.5GB. My laptop fans spin up constantly. Electron apps really need to be leaner — this is a dealbreaker for people on older hardware.",
+    "userName": "devops_Sara",
+    "at": "2026-04-17T13:50:00Z",
+    "score": 2
+  },
+  {
+    "reviewId": "gp:slack007",
+    "content": "Love the Huddles feature for quick voice chats. It's replaced our need for separate meeting software for standups. Sound quality is solid and the screen share works smoothly even on slower connections.",
+    "userName": "remoteWorkFan",
+    "at": "2026-04-17T09:30:00Z",
+    "score": 5
+  },
+  {
+    "reviewId": "gp:slack008",
+    "content": "Logged in on Monday and all my sidebar customizations were gone. Starred channels disappeared, custom sections reset. This happened after an update. No warning, no way to restore from backup.",
+    "userName": "angryCTO",
+    "at": "2026-04-16T15:40:00Z",
+    "score": 1
+  },
+  {
+    "reviewId": "gp:slack009",
+    "content": "Mobile app crashes when I try to upload images from my gallery. Happens consistently on Android 14 with a Pixel 8. Have to share the image into Slack from my gallery app instead, which defeats the purpose of in-app uploads.",
+    "userName": "androidUser2024",
+    "at": "2026-04-16T08:22:00Z",
+    "score": 2
+  },
+  {
+    "reviewId": "gp:slack010",
+    "content": "Decent app overall. Threads could be better — hard to follow conversations when there are many nested replies. But core messaging works great and the integrations with Google Drive and Jira save me a lot of context switching.",
+    "userName": "moderateUser",
+    "at": "2026-04-15T17:55:00Z",
+    "score": 4
+  },
+  {
+    "reviewId": "gp:slack011",
+    "content": "The free tier is too limited. 90 days of message history isn't enough for our small startup. We can't afford the Pro plan yet and we're losing important context from older threads. Consider a middle tier for 5-person teams.",
+    "userName": "startupFounder_Kai",
+    "at": "2026-04-15T11:10:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack012",
+    "content": "Workflow Builder is a hidden gem. Set up auto-reminders for our daily standup, welcome messages for new joiners, and an approval flow for PTO requests. Saves our ops team 2-3 hours per week easily.",
+    "userName": "automationNerd",
+    "at": "2026-04-14T14:35:00Z",
+    "score": 5
+  },
+  {
+    "reviewId": "gp:slack013",
+    "content": "Getting random 'session expired' errors and having to re-authenticate multiple times a day. SSO integration with Okta sometimes just hangs. It's disrupting my workflow constantly.",
+    "userName": "ITAdmin_Jenny",
+    "at": "2026-04-14T09:48:00Z",
+    "score": 1
+  },
+  {
+    "reviewId": "gp:slack014",
+    "content": "File uploads from iOS are glitchy. Sometimes the progress bar sits at 99% forever. Other times files appear as 0 bytes to the recipient. Have to re-upload 2-3 times before it works. PDFs are the worst offenders.",
+    "userName": "iosPowerUser",
+    "at": "2026-04-13T16:25:00Z",
+    "score": 2
+  },
+  {
+    "reviewId": "gp:slack015",
+    "content": "The new Canvas feature is interesting but feels half-baked. Can't embed live charts, no version history, and editing is clunky on mobile. Going to stick with Notion for documentation until this matures.",
+    "userName": "productManager_Lee",
+    "at": "2026-04-13T10:30:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack016",
+    "content": "Video calls in Huddles need improvement. No virtual backgrounds, no blur option, and the video quality drops significantly with more than 4 participants. We still need Zoom for proper meetings.",
+    "userName": "meetingOrganizer",
+    "at": "2026-04-12T13:15:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack017",
+    "content": "Keyboard shortcuts are inconsistent between Mac and Windows. Cmd+K on Mac opens search but Ctrl+K on Windows doesn't do the same thing. As someone switching between platforms daily, this is infuriating.",
+    "userName": "keyboardWarrior",
+    "at": "2026-04-12T08:45:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack018",
+    "content": "Slack Connect with external partners is a game changer. We run joint projects with clients in shared channels and it's seamless. No more email threads with forwarded attachments. This alone justifies the Pro subscription.",
+    "userName": "agencyDirector",
+    "at": "2026-04-11T15:00:00Z",
+    "score": 5
+  },
+  {
+    "reviewId": "gp:slack019",
+    "content": "The AI summary feature for threads is nice but often hallucinates. It'll say someone agreed to something they didn't, or miss the actual decision. Can't rely on it for action items — still have to read the full thread.",
+    "userName": "cautiousReader",
+    "at": "2026-04-10T12:40:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack020",
+    "content": "App keeps logging me out on mobile. Push notifications arrive 5-10 minutes late. Sometimes I see the badge count but opening the app shows no new messages. This has been going on for the last two updates.",
+    "userName": "mobileWarrior_Priya",
+    "at": "2026-04-09T07:20:00Z",
+    "score": 1
+  },
+  {
+    "reviewId": "gp:slack021",
+    "content": "Reactions are fun but the emoji picker loads slowly and sometimes doesn't register my tap. Also, the unfurl for Twitter/X links broke last week — just shows a blank card instead of the tweet preview.",
+    "userName": "dailyUser99",
+    "at": "2026-04-08T18:30:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack022",
+    "content": "Setting up Slack for a 200-person org was smoother than I expected. The admin dashboard gives good visibility into adoption metrics. Channel templates helped us standardize naming. Would recommend for mid-size teams.",
+    "userName": "enterpriseITPro",
+    "at": "2026-04-07T10:10:00Z",
+    "score": 4
+  },
+  {
+    "reviewId": "gp:slack023",
+    "content": "Audio only in Huddles randomly cuts out for 2-3 seconds at a time. Happens on both desktop and mobile. My internet is fiber and other apps work fine. Makes it unusable for important calls.",
+    "userName": "audioIssues_Raj",
+    "at": "2026-04-06T14:55:00Z",
+    "score": 1
+  },
+  {
+    "reviewId": "gp:slack024",
+    "content": "The dark mode looks great on desktop but the mobile version has weird contrast issues. Some channel names are barely readable and code blocks in dark mode appear to use the light theme colors making them unreadable.",
+    "userName": "darkModeAdvocate",
+    "at": "2026-04-05T20:15:00Z",
+    "score": 3
+  },
+  {
+    "reviewId": "gp:slack025",
+    "content": "Best team communication tool we've used. Replaced email for 80% of internal comms. Integrations are top-notch — we pipe in alerts from PagerDuty, deploy notifications from GitHub, and survey results from Typeform all in one place.",
+    "userName": "techLead_AMA",
+    "at": "2026-04-04T09:00:00Z",
+    "score": 5
+  }
+]

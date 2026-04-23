@@ -40,6 +40,8 @@
 - `scikit-learn>=1.6.0` is a backend dependency (provides `sklearn.cluster.HDBSCAN` for theme clustering).
 - Git repo was moved from `backend/` (where `uv init` created it) to the project root `feedback-intelligence/`.
 - `frontend/` uses Bun (not pnpm): add packages with the Bun CLI instead of hand-editing `package.json` dependency entries; keep Tailwind usage aligned with Tailwind CSS v4 syntax in components.
+- M4.1 built: 6-service docker-compose (postgres+pgvector, redis, backend, celery-worker, celery-beat, frontend); multi-stage Dockerfile with conditional RUN_MIGRATIONS; health checks on postgres/redis/backend; pgvector init.sql; Vite proxy via VITE_API_URL env var; conditional ssl_require in settings.py.
+- M4.2 built: `seed_real_data` management command (Google Play scraper → classify/embed/discover pipeline → corrections → gold set → improvement → snapshots → report+alerts → recommendations+outcomes); `google-play-scraper>=1.2.5` added to pyproject.toml; 24 seed tests; CLI flags: --tenant-id, --app-id (com.Slack), --count (200), --fixture, --period-start/end, --reset, --dry-run, --async; synchronous by default (CELERY_TASK_ALWAYS_EAGER), async exits after pipeline dispatch; fallback fixture at scripts/fixtures/slack_reviews.json; `_reset_data()` extends reset_app_data with Report/ReportSection/CorrectionDisagreement/GoldSetItem. 105 backend tests total (24 new).
 
 ## Build Notes Format (Persistent)
 

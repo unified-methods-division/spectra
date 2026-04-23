@@ -16,6 +16,7 @@ dependencies = [
     "pydantic-ai>=1.77.0",
     "python-dotenv>=1.2.2",
     "redis>=7.4.0",
+    "google-play-scraper>=1.2.5",
     "scikit-learn>=1.6.0",
 ]
 
