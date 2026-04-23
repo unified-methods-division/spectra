@@ -153,12 +153,21 @@ echo "VITE_TENANT_ID=your-tenant-uuid-here" > .env.local
 bun dev
 ```
 
+### Seed real Slack reviews
+
+```bash
+cd backend
+uv run python manage.py seed_real_data --reset
+```
+
+Scrapes Google Play reviews for Slack, runs the full pipeline (classify, embed, discover themes, corrections, gold set, improvement loop, snapshots, report + alerts, recommendations + outcomes). Defaults to 200 reviews. Use `--fixture scripts/fixtures/slack_reviews.json` to skip scraping, `--dry-run` to preview, or `--app-id com.Discord` to target a different app.
+
 ### First run
 
-1. Start Redis, backend, Celery worker, and frontend (`celery beat` too if you want scheduled jobs running automatically), or just run `tmuxp load ./`
-2. Log in at http://localhost:8000/admin/ (creates session cookie)
-3. Open http://localhost:5173/sources
-4. Add a source, upload a CSV, watch it process
+1. `tmuxp load ./` (or start Redis, backend, worker, frontend manually)
+2. `cd backend && uv run python manage.py seed_real_data --reset`
+3. Log in at http://localhost:8000/admin/ (creates session cookie)
+4. Open http://localhost:5173/sources
 
 ## Project structure
 
